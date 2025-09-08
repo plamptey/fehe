@@ -35,10 +35,17 @@ if timetable['DATE_ONLY'].isna().any():
     print(timetable.loc[timetable['DATE_ONLY'].isna(), 'DAY & DATE'])
 
 
-# Extract start time as datetime.time
-timetable['START_TIME'] = pd.to_datetime(
-    timetable['TIME'].str.split('-').str[0].str.replace('.', ':'), format='%H:%M'
-).dt.time
+# Extract start time
+start_times = timetable['TIME'].str.split('-').str[0].str.replace('.', ':', regex=False).str.strip()
+
+# Convert to datetime, coercing errors
+timetable['START_TIME'] = pd.to_datetime(start_times, format='%H:%M', errors='coerce').dt.time
+
+# Optional: warn if any times failed to parse
+if timetable['START_TIME'].isna().any():
+    print("Warning: Some start times could not be parsed:")
+    print(timetable.loc[timetable['START_TIME'].isna(), 'TIME'])
+
 
 # ------------------------
 # Coloring for grouped rows
