@@ -10,9 +10,9 @@ import sys
 # ------------------------
 # Config / Input paths
 # ------------------------
-csv_path = "C:/Users/HP/Documents/AAMUSTED/2025/timetable/input_data/fehe_final.csv"
-logo_path = "C:/Users/HP/Documents/AAMUSTED/2025/timetable/input_data/AAMUSTED-LOGO.jpg"
-developer_info = "Note there may be errors(confrim with FEHE official timetable)👨‍💻 Developed by: Patrick Nii Lante Lamptey | 📞 +233-208 426 593"
+csv_path = "fehe_final.csv"
+logo_path = "AAMUSTED-LOGO.jpg"
+developer_info = "Note there may be errors(confirm with FEHE official timetable)👨‍💻 Developed by: Patrick Nii Lante Lamptey | 📞 +233-208 426 593"
 
 # Load timetable (directly as DataFrame from CSV)
 timetable = pd.read_csv(csv_path, encoding="windows-1252")
@@ -90,14 +90,14 @@ def run_streamlit_mode():
     import smtplib
     from email.mime.text import MIMEText
 
-    st.set_page_config(page_title="AAMUSTED-M Exam Timetable", layout="wide")
+    st.set_page_config(page_title="DEMO FEHE AAMUSTED-M Exam Timetable", layout="wide")
 
     try:
         st.image(logo_path, width=140)
     except Exception:
         st.warning("Logo not found (check logo_path).")
 
-    st.title("📘 AAMUSTED-M 2nd Semester 2025 Examination Timetable")
+    st.title("DEMO FEHE AAMUSTED-M 2nd Semester 2025 Examination Timetable")
 
     # Sidebar filters
     st.sidebar.header("🔎 Filter Timetable")
@@ -175,17 +175,17 @@ def run_streamlit_mode():
     st.markdown("### 📅 Filtered Timetable", unsafe_allow_html=True)
     st.markdown(html_table, unsafe_allow_html=True)
 
-    # CSV download (no openpyxl needed)
-    output = BytesIO()
-    filtered.to_csv(output, index=False, encoding="utf-8")
-    output.seek(0)
+    # # CSV download (no openpyxl needed)
+    # output = BytesIO()
+    # filtered.to_csv(output, index=False, encoding="utf-8")
+    # output.seek(0)
     
-    st.download_button(
-        label="⬇️ Download Filtered Timetable as CSV",
-        data=output,
-        file_name="filtered_timetable.csv",
-        mime="text/csv"
-    )
+    # st.download_button(
+    #     label="⬇️ Download Filtered Timetable as CSV",
+    #     data=output,
+    #     file_name="filtered_timetable.csv",
+    #     mime="text/csv"
+    # )
 
     # Subscription form
     st.sidebar.header("🔔 Subscribe for Exam Alerts")
