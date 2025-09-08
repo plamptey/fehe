@@ -171,17 +171,17 @@ def run_streamlit_mode():
     st.markdown("### 📅 Filtered Timetable", unsafe_allow_html=True)
     st.markdown(html_table, unsafe_allow_html=True)
 
-    # CSV download (no openpyxl needed)
-    output = BytesIO()
-    filtered.to_csv(output, index=False, encoding="utf-8")
-    output.seek(0)
+    # # CSV download (no openpyxl needed)
+    # output = BytesIO()
+    # filtered.to_csv(output, index=False, encoding="utf-8")
+    # output.seek(0)
     
-    st.download_button(
-        label="⬇️ Download Filtered Timetable as CSV",
-        data=output,
-        file_name="filtered_timetable.csv",
-        mime="text/csv"
-    )
+    # st.download_button(
+    #     label="⬇️ Download Filtered Timetable as CSV",
+    #     data=output,
+    #     file_name="filtered_timetable.csv",
+    #     mime="text/csv"
+    # )
 
 
     # Subscription form
