@@ -86,14 +86,14 @@ def run_streamlit_mode():
     import smtplib
     from email.mime.text import MIMEText
 
-    st.set_page_config(page_title="AAMUSTED-M FEHE Exam Timetable DEMO", layout="wide")
+    st.set_page_config(page_title="DEMO FEHE AAMUSTED-M Exam Timetable", layout="wide")
 
     try:
         st.image(logo_path, width=140)
     except Exception:
         st.warning("Logo not found (check logo_path).")
 
-    st.title("📘 AAMUSTED-M FEHE 2nd Semester 2025 Examination Timetable DEMO")
+    st.title("DEMO FEHE AAMUSTED-M 2nd Semester 2025 Examination Timetable ")
 
     # Sidebar filters
     st.sidebar.header("🔎 Filter Timetable")
