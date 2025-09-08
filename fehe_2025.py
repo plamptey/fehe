@@ -17,11 +17,23 @@ timetable = pd.read_csv(csv_path, encoding="windows-1252")
 # ------------------------
 # Convert date and time for proper sorting
 # ------------------------
-# Remove ordinal suffixes (1ST, 2ND, 3RD, 4TH, etc.) and parse to datetime
-timetable['DATE_ONLY'] = pd.to_datetime(
-    timetable['DAY & DATE'].str.replace(r'(\d+)(ST|ND|RD|TH)', r'\1', regex=True),
-    format='%A %d %B, %Y'
+# Remove ordinal suffixes and extra spaces
+dates_clean = (
+    timetable['DAY & DATE']
+    .str.upper()  # ensure uniform capitalization
+    .str.replace(r'(\d+)(ST|ND|RD|TH)', r'\1', regex=True)  # remove 1ST, 2ND, etc.
+    .str.replace(r',', '', regex=True)  # remove commas
+    .str.strip()
 )
+
+# Parse using dayfirst=True to be flexible
+timetable['DATE_ONLY'] = pd.to_datetime(dates_clean, dayfirst=True, errors='coerce')
+
+# Check for rows that failed to parse
+if timetable['DATE_ONLY'].isna().any():
+    print("Warning: Some dates could not be parsed:")
+    print(timetable.loc[timetable['DATE_ONLY'].isna(), 'DAY & DATE'])
+
 
 # Extract start time as datetime.time
 timetable['START_TIME'] = pd.to_datetime(
