@@ -1,18 +1,14 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[15]:
-
-
 import pandas as pd
 import sys
 
 # ------------------------
 # Config / Input paths
 # ------------------------
-csv_path = "C:/Users/HP/Documents/AAMUSTED/2025/timetable/input_data/fehe_final.csv"
-logo_path = "C:/Users/HP/Documents/AAMUSTED/2025/timetable/input_data/AAMUSTED-LOGO.jpg"
-developer_info = "👨‍💻 Developed by: Patrick Nii Lante Lamptey | 📞 +233-208 426 593"
+# csv_path = "C:/Users/HP/Documents/AAMUSTED/2025/timetable/input_data/fehe_final.csv"
+# logo_path = "C:/Users/HP/Documents/AAMUSTED/2025/timetable/input_data/AAMUSTED-LOGO.jpg"
+csv_path = "fehe_final.csv"
+logo_path = "AAMUSTED-LOGO.jpg"
+developer_info = "Note there may be errors(confrim with FEHE official timetable)👨‍💻 Developed by: Patrick Nii Lante Lamptey | 📞 +233-208 426 593"
 
 # Load timetable (directly as DataFrame from CSV)
 timetable = pd.read_csv(csv_path, encoding="windows-1252")
@@ -222,10 +218,3 @@ if "streamlit" in sys.modules:
     run_streamlit_mode()
 else:
     run_jupyter_mode()
-
-
-# In[13]:
-
-
-print(timetable_path)
-
