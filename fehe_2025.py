@@ -130,7 +130,10 @@ def run_streamlit_mode():
         filtered = filtered[filtered["DAY & DATE"] == day_filter]
     if inv_filter not in ["All", "None"] and "INVIG." in filtered.columns:
         filtered = filtered[filtered["INVIG."] == inv_filter]
-
+        
+    # Sort filtered timetable chronologically
+    filtered = filtered.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
+    
     drop_cols = []
     if faculty_filter == "None": drop_cols.append("FACULTY")
     if dept_filter == "None": drop_cols.append("DEPARTMENT")
@@ -145,7 +148,8 @@ def run_streamlit_mode():
                          "TOTAL STDS", "NO. OF STDS", "VENUE", "INVIG.", "FACULTY", "DEPARTMENT"]
         display_cols = [c for c in possible_cols if c in df.columns]
 
-        df_sorted = df.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
+        # df_sorted = df.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
+        df_display = df.copy()
         row_colors = compute_group_row_colors(df_sorted)
 
         df_display = df_sorted.copy()
