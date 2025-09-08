@@ -8,7 +8,7 @@ import sys
 # logo_path = "C:/Users/HP/Documents/AAMUSTED/2025/timetable/input_data/AAMUSTED-LOGO.jpg"
 csv_path = "fehe_final.csv"
 logo_path = "AAMUSTED-LOGO.jpg"
-developer_info = "Note there may be errors(confrim with FEHE official timetable)👨‍💻 Developed by: Patrick Nii Lante Lamptey | 📞 +233-208 426 593"
+developer_info = "Note there may be errors(confirm with FEHE official timetable)👨‍💻 Developed by: Patrick Nii Lante Lamptey | 📞 +233-208 426 593"
 
 # Load timetable (directly as DataFrame from CSV)
 timetable = pd.read_csv(csv_path, encoding="windows-1252")
