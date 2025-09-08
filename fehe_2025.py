@@ -171,18 +171,18 @@ def run_streamlit_mode():
     st.markdown("### 📅 Filtered Timetable", unsafe_allow_html=True)
     st.markdown(html_table, unsafe_allow_html=True)
 
-    # Excel download
+    # CSV download (no openpyxl needed)
     output = BytesIO()
-    with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        filtered.to_excel(writer, index=False, sheet_name="Timetable")
+    filtered.to_csv(output, index=False, encoding="utf-8")
     output.seek(0)
-
+    
     st.download_button(
-        label="⬇️ Download Filtered Timetable as Excel",
+        label="⬇️ Download Filtered Timetable as CSV",
         data=output,
-        file_name="filtered_timetable.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        file_name="filtered_timetable.csv",
+        mime="text/csv"
     )
+
 
     # Subscription form
     st.sidebar.header("🔔 Subscribe for Exam Alerts")
