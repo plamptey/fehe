@@ -17,6 +17,19 @@ developer_info = "Note there may be errors(confirm with FEHE official timetable)
 # Load timetable (directly as DataFrame from CSV)
 timetable = pd.read_csv(csv_path, encoding="windows-1252")
 
+# Convert 'DAY & DATE' to datetime
+# Remove the day name (MONDAY, TUESDAY, etc.) before parsing
+timetable['DATE_ONLY'] = timetable['DAY & DATE'].str.extract(r'(\d{1,2}\w{2} \w+, \d{4})')[0]
+timetable['DATE_ONLY'] = pd.to_datetime(timetable['DATE_ONLY'], format='%d%b, %Y', errors='coerce')
+
+# Optional: convert TIME to start time for better sorting
+timetable['START_TIME'] = timetable['TIME'].str.extract(r'(\d{1,2}[:.]\d{2})')[0]
+timetable['START_TIME'] = pd.to_datetime(timetable['START_TIME'], format='%H:%M', errors='coerce').dt.time
+
+# Sort by DATE_ONLY then START_TIME
+timetable_sorted = timetable.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
+
+
 # A small palette to colour groups (will cycle)
 GROUP_COLORS = ["#FFF2CC", "#D9EAD3", "#F4CCCC", "#CFE2F3", "#EAD1DC", "#FDEBD0"]
 
@@ -54,8 +67,7 @@ def run_jupyter_mode():
     except Exception:
         pass
 
-    sort_cols = [c for c in ["DAY & DATE", "TIME"] if c in timetable.columns]
-    df_sorted = timetable.sort_values(by=sort_cols).reset_index(drop=True)
+    df_sorted = timetable_sorted.copy()
 
     row_colors = compute_group_row_colors(df_sorted)
 
