@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[15]:
-
-
 import pandas as pd
 import sys
 
@@ -14,28 +11,28 @@ csv_path = "fehe_final.csv"
 logo_path = "AAMUSTED-LOGO.jpg"
 developer_info = "Note there may be errors(confirm with FEHE official timetable)👨‍💻 Developed by: Patrick Nii Lante Lamptey | 📞 +233-208 426 593"
 
-# Load timetable (directly as DataFrame from CSV)
+# Load timetable
 timetable = pd.read_csv(csv_path, encoding="windows-1252")
 
-# Convert 'DAY & DATE' to datetime
-# Remove the day name (MONDAY, TUESDAY, etc.) before parsing
+# ------------------------
+# Convert DAY & DATE and TIME to proper sortable types
+# ------------------------
+# Extract date part (remove weekday name)
 timetable['DATE_ONLY'] = timetable['DAY & DATE'].str.extract(r'(\d{1,2}\w{2} \w+, \d{4})')[0]
 timetable['DATE_ONLY'] = pd.to_datetime(timetable['DATE_ONLY'], format='%d%b, %Y', errors='coerce')
 
-# Optional: convert TIME to start time for better sorting
+# Extract start time
 timetable['START_TIME'] = timetable['TIME'].str.extract(r'(\d{1,2}[:.]\d{2})')[0]
 timetable['START_TIME'] = pd.to_datetime(timetable['START_TIME'], format='%H:%M', errors='coerce').dt.time
 
-# Sort by DATE_ONLY then START_TIME
+# Sort timetable
 timetable_sorted = timetable.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
 
-
-# A small palette to colour groups (will cycle)
+# ------------------------
+# Group colors
+# ------------------------
 GROUP_COLORS = ["#FFF2CC", "#D9EAD3", "#F4CCCC", "#CFE2F3", "#EAD1DC", "#FDEBD0"]
 
-# ------------------------
-# Helper: compute group colouring
-# ------------------------
 def compute_group_row_colors(df, key_cols=None):
     if key_cols is None:
         key_cols = ['DAY & DATE', 'TIME', 'COURSE CODE', 'FACULTY','DEPARTMENT']
@@ -46,7 +43,6 @@ def compute_group_row_colors(df, key_cols=None):
 
     group_colors = {}
     color_idx = 0
-
     grouped = df.groupby(key_cols, sort=False)
     for _, group in grouped:
         if len(group) > 1:
@@ -54,11 +50,10 @@ def compute_group_row_colors(df, key_cols=None):
             color_idx += 1
             for idx in group.index:
                 group_colors[idx] = color
-
     return group_colors
 
 # ------------------------
-# JUPYTER MODE: display with Styler
+# Jupyter mode
 # ------------------------
 def run_jupyter_mode():
     from IPython.display import display, Image
@@ -68,7 +63,6 @@ def run_jupyter_mode():
         pass
 
     df_sorted = timetable_sorted.copy()
-
     row_colors = compute_group_row_colors(df_sorted)
 
     styles = pd.DataFrame("", index=df_sorted.index, columns=df_sorted.columns)
@@ -94,7 +88,7 @@ def run_jupyter_mode():
     print("\n" + developer_info)
 
 # ------------------------
-# STREAMLIT MODE: render timetable
+# Streamlit mode
 # ------------------------
 def run_streamlit_mode():
     import streamlit as st
@@ -125,7 +119,7 @@ def run_streamlit_mode():
     day_filter = st.sidebar.selectbox("Select Day", days)
     inv_filter = st.sidebar.selectbox("Select Invigilator", invigilators)
 
-    filtered = timetable.copy()
+    filtered = timetable_sorted.copy()
     if faculty_filter not in ["All", "None"] and "FACULTY" in filtered.columns:
         filtered = filtered[filtered["FACULTY"] == faculty_filter]
     if dept_filter not in ["All", "None"] and "DEPARTMENT" in filtered.columns:
@@ -151,9 +145,7 @@ def run_streamlit_mode():
                          "TOTAL STDS", "NO. OF STDS", "VENUE", "INVIG.", "FACULTY", "DEPARTMENT"]
         display_cols = [c for c in possible_cols if c in df.columns]
 
-        sort_cols = [c for c in ["DAY & DATE", "TIME"] if c in df.columns]
-        df_sorted = df.sort_values(by=sort_cols).reset_index(drop=True)
-
+        df_sorted = df.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
         row_colors = compute_group_row_colors(df_sorted)
 
         df_display = df_sorted.copy()
@@ -179,25 +171,11 @@ def run_streamlit_mode():
                 html += f"<td style='{td_style}'>{cell}</td>"
             html += "</tr>"
         html += "</tbody></table></div>"
-
         return html
 
     html_table = render_table_html_for_streamlit(filtered)
-
     st.markdown("### 📅 Filtered Timetable", unsafe_allow_html=True)
     st.markdown(html_table, unsafe_allow_html=True)
-
-    # # CSV download (no openpyxl needed)
-    # output = BytesIO()
-    # filtered.to_csv(output, index=False, encoding="utf-8")
-    # output.seek(0)
-    
-    # st.download_button(
-    #     label="⬇️ Download Filtered Timetable as CSV",
-    #     data=output,
-    #     file_name="filtered_timetable.csv",
-    #     mime="text/csv"
-    # )
 
     # Subscription form
     st.sidebar.header("🔔 Subscribe for Exam Alerts")
@@ -226,6 +204,7 @@ def run_streamlit_mode():
     st.markdown("---")
     st.markdown(f"<div style='text-align:center;color:gray'>{developer_info}</div>", unsafe_allow_html=True)
 
+
 # ------------------------
 # Auto-detect environment
 # ------------------------
@@ -233,10 +212,3 @@ if "streamlit" in sys.modules:
     run_streamlit_mode()
 else:
     run_jupyter_mode()
-
-
-# In[ ]:
-
-
-
-
