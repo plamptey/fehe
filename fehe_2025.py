@@ -9,33 +9,33 @@ import sys
 # ------------------------
 csv_path = "fehe_final.csv"
 logo_path = "AAMUSTED-LOGO.jpg"
-developer_info = "Note there may be errors(confirm with FEHE official timetable)👨‍💻 Developed by: Patrick Nii Lante Lamptey | 📞 +233-208 426 593"
+developer_info = "Note there may be errors (confirm with FEHE official timetable) 👨‍💻 Developed by: Patrick Nii Lante Lamptey | 📞 +233-208 426 593"
 
 # Load timetable
 timetable = pd.read_csv(csv_path, encoding="windows-1252")
 
 # ------------------------
-# Convert DAY & DATE and TIME to proper sortable types
+# Convert date and time for proper sorting
 # ------------------------
-# Extract date part (remove weekday name)
-timetable['DATE_ONLY'] = timetable['DAY & DATE'].str.extract(r'(\d{1,2}\w{2} \w+, \d{4})')[0]
-timetable['DATE_ONLY'] = pd.to_datetime(timetable['DATE_ONLY'], format='%d%b, %Y', errors='coerce')
+# Remove ordinal suffixes (1ST, 2ND, 3RD, 4TH, etc.) and parse to datetime
+timetable['DATE_ONLY'] = pd.to_datetime(
+    timetable['DAY & DATE'].str.replace(r'(\d+)(ST|ND|RD|TH)', r'\1', regex=True),
+    format='%A %d %B, %Y'
+)
 
-# Extract start time
-timetable['START_TIME'] = timetable['TIME'].str.extract(r'(\d{1,2}[:.]\d{2})')[0]
-timetable['START_TIME'] = pd.to_datetime(timetable['START_TIME'], format='%H:%M', errors='coerce').dt.time
-
-# Sort timetable
-timetable_sorted = timetable.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
+# Extract start time as datetime.time
+timetable['START_TIME'] = pd.to_datetime(
+    timetable['TIME'].str.split('-').str[0].str.replace('.', ':'), format='%H:%M'
+).dt.time
 
 # ------------------------
-# Group colors
+# Coloring for grouped rows
 # ------------------------
 GROUP_COLORS = ["#FFF2CC", "#D9EAD3", "#F4CCCC", "#CFE2F3", "#EAD1DC", "#FDEBD0"]
 
 def compute_group_row_colors(df, key_cols=None):
     if key_cols is None:
-        key_cols = ['DAY & DATE', 'TIME', 'COURSE CODE', 'FACULTY','DEPARTMENT']
+        key_cols = ['DAY & DATE', 'TIME', 'COURSE CODE', 'FACULTY', 'DEPARTMENT']
 
     key_cols = [c for c in key_cols if c in df.columns]
     if not key_cols:
@@ -43,6 +43,7 @@ def compute_group_row_colors(df, key_cols=None):
 
     group_colors = {}
     color_idx = 0
+
     grouped = df.groupby(key_cols, sort=False)
     for _, group in grouped:
         if len(group) > 1:
@@ -50,10 +51,11 @@ def compute_group_row_colors(df, key_cols=None):
             color_idx += 1
             for idx in group.index:
                 group_colors[idx] = color
+
     return group_colors
 
 # ------------------------
-# Jupyter mode
+# Jupyter display
 # ------------------------
 def run_jupyter_mode():
     from IPython.display import display, Image
@@ -62,7 +64,7 @@ def run_jupyter_mode():
     except Exception:
         pass
 
-    df_sorted = timetable_sorted.copy()
+    df_sorted = timetable.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
     row_colors = compute_group_row_colors(df_sorted)
 
     styles = pd.DataFrame("", index=df_sorted.index, columns=df_sorted.columns)
@@ -107,11 +109,11 @@ def run_streamlit_mode():
 
     # Sidebar filters
     st.sidebar.header("🔎 Filter Timetable")
-    faculties = ["All", "None"] + sorted(timetable["FACULTY"].dropna().unique().tolist()) if "FACULTY" in timetable.columns else ["All", "None"]
-    departments = ["All", "None"] + sorted(timetable["DEPARTMENT"].dropna().unique().tolist()) if "DEPARTMENT" in timetable.columns else ["All", "None"]
-    levels = ["All", "None"] + sorted(timetable["CLASS"].dropna().unique().tolist()) if "CLASS" in timetable.columns else ["All", "None"]
-    days = ["All", "None"] + sorted(timetable["DAY & DATE"].dropna().unique().tolist()) if "DAY & DATE" in timetable.columns else ["All", "None"]
-    invigilators = ["All", "None"] + sorted(timetable["INVIG."].dropna().unique().tolist()) if "INVIG." in timetable.columns else ["All", "None"]
+    faculties = ["All", "None"] + sorted(timetable["FACULTY"].dropna().unique().tolist())
+    departments = ["All", "None"] + sorted(timetable["DEPARTMENT"].dropna().unique().tolist())
+    levels = ["All", "None"] + sorted(timetable["CLASS"].dropna().unique().tolist())
+    days = ["All", "None"] + sorted(timetable["DAY & DATE"].dropna().unique().tolist())
+    invigilators = ["All", "None"] + sorted(timetable["INVIG."].dropna().unique().tolist())
 
     faculty_filter = st.sidebar.selectbox("Select Faculty", faculties)
     dept_filter = st.sidebar.selectbox("Select Department", departments)
@@ -119,27 +121,24 @@ def run_streamlit_mode():
     day_filter = st.sidebar.selectbox("Select Day", days)
     inv_filter = st.sidebar.selectbox("Select Invigilator", invigilators)
 
-    filtered = timetable_sorted.copy()
-    if faculty_filter not in ["All", "None"] and "FACULTY" in filtered.columns:
+    # Apply filters
+    filtered = timetable.copy()
+    if faculty_filter not in ["All", "None"]:
         filtered = filtered[filtered["FACULTY"] == faculty_filter]
-    if dept_filter not in ["All", "None"] and "DEPARTMENT" in filtered.columns:
+    if dept_filter not in ["All", "None"]:
         filtered = filtered[filtered["DEPARTMENT"] == dept_filter]
-    if level_filter not in ["All", "None"] and "CLASS" in filtered.columns:
+    if level_filter not in ["All", "None"]:
         filtered = filtered[filtered["CLASS"] == level_filter]
-    if day_filter not in ["All", "None"] and "DAY & DATE" in filtered.columns:
+    if day_filter not in ["All", "None"]:
         filtered = filtered[filtered["DAY & DATE"] == day_filter]
-    if inv_filter not in ["All", "None"] and "INVIG." in filtered.columns:
+    if inv_filter not in ["All", "None"]:
         filtered = filtered[filtered["INVIG."] == inv_filter]
 
-    drop_cols = []
-    if faculty_filter == "None": drop_cols.append("FACULTY")
-    if dept_filter == "None": drop_cols.append("DEPARTMENT")
-    if level_filter == "None": drop_cols.append("CLASS")
-    if day_filter == "None": drop_cols.append("DAY & DATE")
-    if inv_filter == "None": drop_cols.append("INVIG.")
-    # filtered = filtered.drop(columns=[c for c in drop_cols if c in filtered.columns], errors="ignore")
     # ✅ Sort after filtering
     filtered = filtered.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
+
+    # Row colors
+    row_colors = compute_group_row_colors(filtered)
 
     # Render HTML table
     def render_table_html_for_streamlit(df):
@@ -147,10 +146,7 @@ def run_streamlit_mode():
                          "TOTAL STDS", "NO. OF STDS", "VENUE", "INVIG.", "FACULTY", "DEPARTMENT"]
         display_cols = [c for c in possible_cols if c in df.columns]
 
-        df_sorted = df.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
-        row_colors = compute_group_row_colors(df_sorted)
-
-        df_display = df_sorted.copy()
+        df_display = df.copy()
         if "DAY & DATE" in df_display.columns:
             df_display["DAY & DATE"] = df_display["DAY & DATE"].mask(df_display["DAY & DATE"].duplicated())
 
@@ -173,6 +169,7 @@ def run_streamlit_mode():
                 html += f"<td style='{td_style}'>{cell}</td>"
             html += "</tr>"
         html += "</tbody></table></div>"
+
         return html
 
     html_table = render_table_html_for_streamlit(filtered)
@@ -205,7 +202,6 @@ def run_streamlit_mode():
 
     st.markdown("---")
     st.markdown(f"<div style='text-align:center;color:gray'>{developer_info}</div>", unsafe_allow_html=True)
-
 
 # ------------------------
 # Auto-detect environment
