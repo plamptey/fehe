@@ -137,7 +137,9 @@ def run_streamlit_mode():
     if level_filter == "None": drop_cols.append("CLASS")
     if day_filter == "None": drop_cols.append("DAY & DATE")
     if inv_filter == "None": drop_cols.append("INVIG.")
-    filtered = filtered.drop(columns=[c for c in drop_cols if c in filtered.columns], errors="ignore")
+    # filtered = filtered.drop(columns=[c for c in drop_cols if c in filtered.columns], errors="ignore")
+    # ✅ Sort after filtering
+    filtered = filtered.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
 
     # Render HTML table
     def render_table_html_for_streamlit(df):
