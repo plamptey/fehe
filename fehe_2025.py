@@ -147,24 +147,23 @@ def run_streamlit_mode():
         possible_cols = ["DAY & DATE", "TIME", "CLASS", "COURSE CODE", "COURSE TITLE",
                          "TOTAL STDS", "NO. OF STDS", "VENUE", "INVIG.", "FACULTY", "DEPARTMENT"]
         display_cols = [c for c in possible_cols if c in df.columns]
-
-        # df_sorted = df.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
+    
+        # df is already sorted chronologically before calling this function
+        row_colors = compute_group_row_colors(df)
+    
         df_display = df.copy()
-        row_colors = compute_group_row_colors(df_sorted)
-
-        df_display = df_sorted.copy()
         if "DAY & DATE" in df_display.columns:
             df_display["DAY & DATE"] = df_display["DAY & DATE"].mask(df_display["DAY & DATE"].duplicated())
-
+    
         th_style = "background:#4CAF50;color:white;padding:8px;text-align:center;"
         td_style = "padding:8px;border-bottom:1px solid #ddd;vertical-align:top;"
-
+    
         html = "<div style='overflow-x:auto;'><table style='border-collapse:collapse;width:100%;'>"
         html += "<thead><tr>"
         for col in display_cols:
             html += f"<th style='{th_style}'>{col}</th>"
         html += "</tr></thead><tbody>"
-
+    
         for idx, row in df_display.iterrows():
             row_color = row_colors.get(idx, "")
             tr_style = f"background:{row_color};" if row_color else ""
@@ -176,6 +175,7 @@ def run_streamlit_mode():
             html += "</tr>"
         html += "</tbody></table></div>"
         return html
+
 
     html_table = render_table_html_for_streamlit(filtered)
     st.markdown("### 📅 Filtered Timetable", unsafe_allow_html=True)
