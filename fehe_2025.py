@@ -8,6 +8,7 @@ import sys
 # Config / Input paths
 # ------------------------
 csv_path = "fehe_final.csv"
+aamusted = "AAMUSTED-LOGO.jpg"
 logo_path = "AAMUSTED-LOGO.jpg"
 developer_info = "Note there may be errors(confirm with FEHE official timetable)👨‍💻 Developed by: Patrick Nii Lante Lamptey | 📞 +233-208 426 593"
 
@@ -64,17 +65,31 @@ def compute_group_row_colors(df, key_cols=None):
 # ------------------------
 def run_jupyter_mode():
     from IPython.display import display, Image
-    try:
-        display(Image(filename=logo_path, width=180))
-    except Exception:
-        pass
+    # try:
+    #     display(Image(filename=logo_path, width=180))
+    # except Exception:
+    #     pass
 
-    df_sorted = timetable_sorted.copy()
-    row_colors = compute_group_row_colors(df_sorted)
+    # df_sorted = timetable_sorted.copy()
+    # row_colors = compute_group_row_colors(df_sorted)
 
-    styles = pd.DataFrame("", index=df_sorted.index, columns=df_sorted.columns)
-    for idx, color in row_colors.items():
-        styles.loc[idx, :] = f"background-color: {color}"
+    # styles = pd.DataFrame("", index=df_sorted.index, columns=df_sorted.columns)
+    # for idx, color in row_colors.items():
+    #     styles.loc[idx, :] = f"background-color: {color}"
+    # Display logos side by side
+    col1, col2 = st.columns([1, 5])
+    with col1:
+        try:
+            st.image("Nsorhwebere_logo.png", width=120)
+        except Exception:
+            st.warning("Nsorhwebere logo not found.")
+    with col2:
+        try:
+            st.image("AAMUSTED-LOGO.jpg", width=120)
+        except Exception:
+            st.warning("AAMUSTEDlogo not found.")
+
+    st.title("Nsorhwebere - FEHE AAMUSTED-M 2nd Semester 2025 Examination Timetable")
 
     df_display = df_sorted.copy()
     if "DAY & DATE" in df_display.columns:
