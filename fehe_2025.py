@@ -15,7 +15,11 @@ developer_info = "Note there may be errors(confirm with FEHE official timetable)
 timetable = pd.read_csv(csv_path, encoding="windows-1252")
 
 # Normalize TIME column (replace dots with colon, strip spaces)
-timetable['TIME'] = timetable['TIME'].str.replace('.', ':', regex=False).str.strip()
+# timetable['TIME'] = timetable['TIME'].str.replace('.', ':', regex=False).str.strip()
+# # Normalize TIME column: remove spaces, replace different dash characters with standard dash
+# timetable['TIME'] = timetable['TIME'].str.strip()
+# timetable['TIME'] = timetable['TIME'].str.replace(r'[–—−]', '-', regex=True)  # replace en-dash/em-dash/minus
+# timetable['TIME'] = timetable['TIME'].str.replace(r'\s*-\s*', '-', regex=True)  # remove spaces around dash
 
 # ------------------------
 # Convert DAY & DATE and TIME to proper sortable types
@@ -90,9 +94,6 @@ def run_jupyter_mode():
     display(styler)
     print("\n" + developer_info)
 
-# ------------------------
-# Streamlit mode
-# ------------------------
 def run_streamlit_mode():
     import streamlit as st
     import smtplib
@@ -100,6 +101,7 @@ def run_streamlit_mode():
 
     st.set_page_config(page_title="DEMO FEHE AAMUSTED-M Exam Timetable", layout="wide")
 
+    # Display logo
     try:
         st.image(logo_path, width=140)
     except Exception:
@@ -107,18 +109,29 @@ def run_streamlit_mode():
 
     st.title("DEMO FEHE AAMUSTED-M 2nd Semester 2025 Examination Timetable")
 
-    # Sidebar filters
-    st.sidebar.header("🔎 Filter Timetable")
-    faculties = ["All", "None"] + sorted(timetable["FACULTY"].dropna().unique().tolist())
-    departments = ["All", "None"] + sorted(timetable["DEPARTMENT"].dropna().unique().tolist())
-    levels = ["All", "None"] + sorted(timetable["CLASS"].dropna().unique().tolist())
-    days = ["All", "None"] + sorted(timetable["DAY & DATE"].dropna().unique().tolist())
-    times = ["All", "None"] + sorted(timetable["TIME"].dropna().unique().tolist())
-    # invigilators = ["All", "None"] + sorted(timetable["INVIG."].dropna().unique().tolist())
-    invigilators = ["All", "None"]
-    if "INVIG." in timetable.columns:
-        invigilators += sorted(timetable["INVIG."].dropna().unique().tolist())
+    # ------------------------
+    # Normalize TIME for consistent filtering
+    # ------------------------
+    timetable['TIME'] = timetable['TIME'].str.replace('.', ':', regex=False).str.strip()
+    timetable['TIME'] = timetable['TIME'].str.replace(r'\s*-\s*', '-', regex=True)  # remove spaces around dash
 
+    # ------------------------
+    # Extract START_HOUR for sorting
+    # ------------------------
+    start_hour = timetable['TIME'].str.extract(r'(\d{1,2}):')[0]
+    timetable['START_HOUR'] = pd.to_numeric(start_hour, errors='coerce')
+
+    # ------------------------
+    # Sidebar filters
+    # ------------------------
+    st.sidebar.header("🔎 Filter Timetable")
+
+    faculties = ["All"] + sorted(timetable["FACULTY"].dropna().unique().tolist())
+    departments = ["All"] + sorted(timetable["DEPARTMENT"].dropna().unique().tolist())
+    levels = ["All"] + sorted(timetable["CLASS"].dropna().unique().tolist())
+    days = ["All"] + sorted(timetable["DAY & DATE"].dropna().unique().tolist())
+    times = ["All"] + sorted(timetable["TIME"].dropna().unique().tolist())
+    invigilators = ["All"] + sorted(timetable["INVIG"].dropna().unique().tolist()) if "INVIG" in timetable.columns else ["All"]
 
     faculty_filter = st.sidebar.selectbox("Select Faculty", faculties)
     dept_filter = st.sidebar.selectbox("Select Department", departments)
@@ -127,43 +140,35 @@ def run_streamlit_mode():
     time_filter = st.sidebar.selectbox("Select Time", times)
     inv_filter = st.sidebar.selectbox("Select Invigilator", invigilators)
 
-    filtered = timetable_sorted.copy()
-    if faculty_filter not in ["All", "None"]:
+    # ------------------------
+    # Apply filters
+    # ------------------------
+    filtered = timetable.copy()
+
+    if faculty_filter != "All":
         filtered = filtered[filtered["FACULTY"] == faculty_filter]
-    if dept_filter not in ["All", "None"]:
+    if dept_filter != "All":
         filtered = filtered[filtered["DEPARTMENT"] == dept_filter]
-    if level_filter not in ["All", "None"]:
+    if level_filter != "All":
         filtered = filtered[filtered["CLASS"] == level_filter]
-    if day_filter not in ["All", "None"]:
+    if day_filter != "All":
         filtered = filtered[filtered["DAY & DATE"] == day_filter]
-    if time_filter not in ["All", "None"]:
+    if time_filter != "All":
         filtered = filtered[filtered["TIME"] == time_filter]
-    # if inv_filter not in ["All", "None"]:
-    #     filtered = filtered[filtered["INVIG."] == inv_filter]
-    if "INVIG." in filtered.columns and inv_filter not in ["All", "None"]:
-        filtered = filtered[filtered["INVIG."] == inv_filter]
+    if "INVIG" in filtered.columns and inv_filter != "All":
+        filtered = filtered[filtered["INVIG"] == inv_filter]
 
+    # ------------------------
+    # Sort chronologically by DATE_ONLY and START_HOUR
+    # ------------------------
+    filtered = filtered.sort_values(by=['DATE_ONLY', 'START_HOUR']).reset_index(drop=True)
 
-    # Sort filtered timetable chronologically
-    filtered = filtered.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
+    # Drop internal sorting column for display
+    display_df = filtered.drop(columns=['DATE_ONLY', 'START_HOUR'], errors='ignore')
 
-    # Drop internal columns used for sorting
-    display_df = filtered.drop(columns=['START_TIME', 'DATE_ONLY'], errors='ignore')
-
-    # Drop columns the user selected as "None"
-    drop_cols = []
-    if faculty_filter == "None": drop_cols.append("FACULTY")
-    if dept_filter == "None": drop_cols.append("DEPARTMENT")
-    if level_filter == "None": drop_cols.append("CLASS")
-    if day_filter == "None": drop_cols.append("DAY & DATE")
-    if time_filter == "None": drop_cols.append("TIME")
-    # if inv_filter == "None": drop_cols.append("INVIG.")
-    if "INVIG." in display_df.columns and inv_filter == "None":
-        drop_cols.append("INVIG.")
-
-    display_df = display_df.drop(columns=[c for c in drop_cols if c in display_df.columns], errors="ignore")
-
-    # Render HTML table
+    # ------------------------
+    # Render table with group colors
+    # ------------------------
     def render_table_html_for_streamlit(df):
         possible_cols = ["DAY & DATE", "TIME", "CLASS", "COURSE CODE", "COURSE TITLE",
                          "TOTAL STDS", "NO. OF STDS", "VENUE", "INVIG.", "FACULTY", "DEPARTMENT"]
@@ -173,7 +178,6 @@ def run_streamlit_mode():
 
         df_display = df.copy()
         if "DAY & DATE" in df_display.columns:
-            # Mask only consecutive duplicates
             df_display["DAY & DATE"] = df_display["DAY & DATE"].mask(
                 df_display["DAY & DATE"].shift() == df_display["DAY & DATE"]
             )
@@ -203,34 +207,9 @@ def run_streamlit_mode():
     st.markdown("### 📅 Filtered Timetable", unsafe_allow_html=True)
     st.markdown(html_table, unsafe_allow_html=True)
 
+    # ------------------------
     # Subscription form
-    st.sidebar.header("🔔 Subscribe for Exam Alerts")
-    student_email = st.sidebar.text_input("Enter your email")
-    subscribe = st.sidebar.button("Subscribe")
-
-    if subscribe and student_email:
-        try:
-            email_sender = st.secrets["mail"]["email"]
-            email_pass = st.secrets["mail"]["password"]
-
-            msg = MIMEText("✅ You are now subscribed to AAMUSTED exam alerts. Stay tuned!")
-            msg["Subject"] = "Exam Timetable Subscription"
-            msg["From"] = email_sender
-            msg["To"] = student_email
-
-            with smtplib.SMTP("smtp.gmail.com", 587) as server:
-                server.starttls()
-                server.login(email_sender, email_pass)
-                server.sendmail(email_sender, [student_email], msg.as_string())
-
-            st.sidebar.success("Subscribed! Confirmation email sent.")
-        except Exception as e:
-            st.sidebar.error(f"Failed to send confirmation: {e}")
-
-    st.markdown("---")
-    st.markdown(f"<div style='text-align:center;color:gray'>{developer_info}</div>", unsafe_allow_html=True)
-
-    # Subscription form
+    # ------------------------
     st.sidebar.header("🔔 Subscribe for Exam Alerts")
     student_email = st.sidebar.text_input("Enter your email")
     subscribe = st.sidebar.button("Subscribe")
@@ -265,3 +244,4 @@ if "streamlit" in sys.modules:
     run_streamlit_mode()
 else:
     run_jupyter_mode()
+
