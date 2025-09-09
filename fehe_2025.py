@@ -137,13 +137,16 @@ def run_streamlit_mode():
     # Sort filtered timetable chronologically
     filtered = filtered.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
     
+    # Drop columns used for internal sorting before display
+    display_df = filtered.drop(columns=['START_TIME', 'DATE_ONLY'], errors='ignore')
     drop_cols = []
     if faculty_filter == "None": drop_cols.append("FACULTY")
     if dept_filter == "None": drop_cols.append("DEPARTMENT")
     if level_filter == "None": drop_cols.append("CLASS")
     if day_filter == "None": drop_cols.append("DAY & DATE")
     if inv_filter == "None": drop_cols.append("INVIG.")
-    filtered = filtered.drop(columns=[c for c in drop_cols if c in filtered.columns], errors="ignore")
+    # filtered = filtered.drop(columns=[c for c in drop_cols if c in filtered.columns], errors="ignore")
+    display_df = display_df.drop(columns=[c for c in drop_cols if c in display_df.columns], errors="ignore")
 
     # Render HTML table
     def render_table_html_for_streamlit(df):
