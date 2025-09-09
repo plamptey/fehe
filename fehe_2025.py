@@ -8,8 +8,8 @@ import sys
 # Config / Input paths
 # ------------------------
 csv_path = "fehe_final.csv"
-aamusted = "AAMUSTED-LOGO.jpg"
-logo_path = "AAMUSTED-LOGO.jpg"
+aamusted_logo = "AAMUSTED-LOGO.jpg"
+nsorhwebere_logo = "nsorhwebere.png"
 developer_info = "Note there may be errors(confirm with FEHE official timetable)👨‍💻 Developed by: Patrick Nii Lante Lamptey | 📞 +233-208 426 593"
 
 # Load timetable
@@ -109,6 +109,9 @@ def run_jupyter_mode():
     display(styler)
     print("\n" + developer_info)
 
+# ------------------------
+# Streamlit mode
+# ------------------------
 def run_streamlit_mode():
     import streamlit as st
     import smtplib
@@ -116,13 +119,20 @@ def run_streamlit_mode():
 
     st.set_page_config(page_title="DEMO FEHE AAMUSTED-M Exam Timetable", layout="wide")
 
-    # Display logo
-    try:
-        st.image(logo_path, width=140)
-    except Exception:
-        st.warning("Logo not found (check logo_path).")
+    # Display two logos at opposite ends
+    col1, col2, col3 = st.columns([1, 6, 1])
+    with col1:
+        try:
+            st.image(nsorhwebere, width=120)
+        except Exception:
+            st.warning("Nsorhwebere logo not found.")
+    with col3:
+        try:
+            st.image(aamusted_logo, width=120)
+        except Exception:
+            st.warning("AAMUSTED logo not found.")
 
-    st.title("DEMO FEHE AAMUSTED-M 2nd Semester 2025 Examination Timetable")
+    st.title("📅 Nsorhwebere - FEHE AAMUSTED-M 2nd Semester 2025 Examination Timetable")
 
     # ------------------------
     # Normalize TIME for consistent filtering
@@ -249,7 +259,6 @@ def run_streamlit_mode():
 
     st.markdown("---")
     st.markdown(f"<div style='text-align:center;color:gray'>{developer_info}</div>", unsafe_allow_html=True)
-
 
 # ------------------------
 # Auto-detect environment
