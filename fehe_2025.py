@@ -132,7 +132,7 @@ def run_streamlit_mode():
         except Exception:
             st.warning("AAMUSTED logo not found.")
 
-    st.title("📅 Nsorhwebere - FEHE AAMUSTED-M 2nd Semester 2025 Examination Timetable")
+    st.title("Nsorhwebere - FEHE AAMUSTED-M 2nd Semester 2025 Examination Timetable")
 
     # ------------------------
     # Normalize TIME for consistent filtering
