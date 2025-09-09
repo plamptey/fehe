@@ -14,6 +14,9 @@ developer_info = "Note there may be errors(confirm with FEHE official timetable)
 # Load timetable
 timetable = pd.read_csv(csv_path, encoding="windows-1252")
 
+# Normalize TIME column (replace dots with colon, strip spaces)
+timetable['TIME'] = timetable['TIME'].str.replace('.', ':', regex=False).str.strip()
+
 # ------------------------
 # Convert DAY & DATE and TIME to proper sortable types
 # ------------------------
