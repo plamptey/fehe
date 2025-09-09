@@ -9,7 +9,7 @@ import sys
 # ------------------------
 csv_path = "fehe_final.csv"
 aamusted_logo = "AAMUSTED-LOGO.jpg"
-nsorhwebere_logo = "nsorhwebere.png"
+nsorhwebere_logo = "nsorhwebere_logo.png"
 developer_info = "Note there may be errors(confirm with FEHE official timetable)👨‍💻 Developed by: Patrick Nii Lante Lamptey | 📞 +233-208 426 593"
 
 # Load timetable
