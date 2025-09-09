@@ -113,13 +113,7 @@ def run_streamlit_mode():
     # Normalize TIME for consistent filtering
     # ------------------------
     timetable['TIME'] = timetable['TIME'].str.replace('.', ':', regex=False).str.strip()
-    timetable['TIME'] = timetable['TIME'].str.replace(r'\s*-\s*', '-', regex=True)  # remove spaces around dash
-
-    # ------------------------
-    # Extract START_HOUR for sorting
-    # ------------------------
-    start_hour = timetable['TIME'].str.extract(r'(\d{1,2}):')[0]
-    timetable['START_HOUR'] = pd.to_numeric(start_hour, errors='coerce')
+    timetable['TIME'] = timetable['TIME'].str.replace(r'\s*-\s*', '-', regex=True)
 
     # ------------------------
     # Sidebar filters
@@ -131,19 +125,23 @@ def run_streamlit_mode():
     levels = ["All"] + sorted(timetable["CLASS"].dropna().unique().tolist())
     days = ["All"] + sorted(timetable["DAY & DATE"].dropna().unique().tolist())
     times = ["All"] + sorted(timetable["TIME"].dropna().unique().tolist())
-    invigilators = ["All"] + sorted(timetable["INVIG"].dropna().unique().tolist()) if "INVIG" in timetable.columns else ["All"]
+    invigilators = ["All"]
+    if "INVIG" in timetable.columns:
+        invigilators += sorted(timetable["INVIG"].dropna().unique().tolist())
 
     faculty_filter = st.sidebar.selectbox("Select Faculty", faculties)
     dept_filter = st.sidebar.selectbox("Select Department", departments)
     level_filter = st.sidebar.selectbox("Select Level/Class", levels)
     day_filter = st.sidebar.selectbox("Select Day", days)
-    time_filter = st.sidebar.selectbox("Select Time", times)
+    time_filter = st.sidebar.selectbox(
+        "Select Time (note: not all times appear by default)", times
+    )
     inv_filter = st.sidebar.selectbox("Select Invigilator", invigilators)
 
     # ------------------------
     # Apply filters
     # ------------------------
-    filtered = timetable.copy()
+    filtered = timetable_sorted.copy()
 
     if faculty_filter != "All":
         filtered = filtered[filtered["FACULTY"] == faculty_filter]
@@ -159,12 +157,12 @@ def run_streamlit_mode():
         filtered = filtered[filtered["INVIG"] == inv_filter]
 
     # ------------------------
-    # Sort chronologically by DATE_ONLY and START_HOUR
+    # Sort chronologically by DATE and START_TIME
     # ------------------------
-    filtered = filtered.sort_values(by=['DATE_ONLY', 'START_HOUR']).reset_index(drop=True)
+    filtered = filtered.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
 
-    # Drop internal sorting column for display
-    display_df = filtered.drop(columns=['DATE_ONLY', 'START_HOUR'], errors='ignore')
+    # Drop internal sorting columns
+    display_df = filtered.drop(columns=['DATE_ONLY', 'START_TIME'], errors='ignore')
 
     # ------------------------
     # Render table with group colors
@@ -178,6 +176,7 @@ def run_streamlit_mode():
 
         df_display = df.copy()
         if "DAY & DATE" in df_display.columns:
+            # Mask only consecutive duplicates
             df_display["DAY & DATE"] = df_display["DAY & DATE"].mask(
                 df_display["DAY & DATE"].shift() == df_display["DAY & DATE"]
             )
