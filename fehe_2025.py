@@ -123,7 +123,7 @@ def run_streamlit_mode():
     col1, col2, col3 = st.columns([1, 6, 1])
     with col1:
         try:
-            st.image(nsorhwebere, width=120)
+            st.image(nsorhwebere_logo, width=120)
         except Exception:
             st.warning("Nsorhwebere logo not found.")
     with col3:
