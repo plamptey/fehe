@@ -3,11 +3,12 @@
 
 import pandas as pd
 import sys
+import streamlit as st
 
 # ------------------------
 # Config / Input paths
 # ------------------------
-csv_path = "fehe_final.csv"
+csv_path = "fehe_final_26.csv"
 aamusted_logo = "AAMUSTED-LOGO.jpg"
 nsorhwebere_logo = "nsorhwebere_logo.png"
 developer_info = "Note there may be errors(confirm with FEHE official timetable)👨‍💻 Developed by: Patrick Nii Lante Lamptey | 📞 +233-208 426 593"
@@ -91,7 +92,8 @@ def run_jupyter_mode():
 
     st.title("Nsorhwebere - FEHE AAMUSTED-M 2nd Semester 2025 Examination Timetable")
 
-    df_display = df_sorted.copy()
+    # df_display = df_sorted.copy()
+    df_display = timetable_sorted.copy()
     if "DAY & DATE" in df_display.columns:
         df_display["DAY & DATE"] = df_display["DAY & DATE"].mask(df_display["DAY & DATE"].duplicated())
 
@@ -104,7 +106,7 @@ def run_jupyter_mode():
     }]
 
     styler = df_display.style.set_table_styles(header_style)
-    styler = styler.apply(lambda _: styles, axis=None)
+    # styler = styler.apply(lambda _: styles, axis=None)
 
     display(styler)
     print("\n" + developer_info)
@@ -132,7 +134,7 @@ def run_streamlit_mode():
         except Exception:
             st.warning("AAMUSTED logo not found.")
 
-    st.title("Nsorhwebere - FEHE AAMUSTED-M 2nd Semester 2025 Examination Timetable")
+    st.title("Nsorhwebere - FEHE AAMUSTED-M 1st Semester 2026 Examination Timetable")
 
     # ------------------------
     # Normalize TIME for consistent filtering
