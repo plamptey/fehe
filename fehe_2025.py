@@ -14,8 +14,10 @@ nsorhwebere_logo = "nsorhwebere_logo.png"
 developer_info = "Note there may be errors(confirm with FEHE official timetable)👨‍💻 Developed by: Patrick Nii Lante Lamptey | 📞 +233-208 426 593"
 
 # Load timetable
-timetable = pd.read_csv(csv_path, encoding="windows-1252")
-
+# timetable = pd.read_csv(csv_path, encoding="windows-1252")
+timetable = pd.read_csv(csv_path, encoding="utf-8-sig")
+timetable.columns = timetable.columns.str.strip()
+timetable = timetable.loc[:, ~timetable.columns.str.contains('^Unnamed')]
 # Normalize TIME column (replace dots with colon, strip spaces)
 # timetable['TIME'] = timetable['TIME'].str.replace('.', ':', regex=False).str.strip()
 # # Normalize TIME column: remove spaces, replace different dash characters with standard dash
