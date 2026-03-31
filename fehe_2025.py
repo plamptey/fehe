@@ -138,12 +138,19 @@ def run_streamlit_mode():
 
     st.title("Nsorhwebere - FEHE AAMUSTED-M 1st Semester 2026 Examination Timetable")
 
+    # # ------------------------
+    # # Normalize TIME for consistent filtering
+    # # ------------------------
+    # timetable['TIME'] = timetable['TIME'].str.replace('.', ':', regex=False).str.strip()
+    # timetable['TIME'] = timetable['TIME'].str.replace(r'\s*-\s*', '-', regex=True)
     # ------------------------
-    # Normalize TIME for consistent filtering
+    # Clean TIME BEFORE sorting
     # ------------------------
-    timetable['TIME'] = timetable['TIME'].str.replace('.', ':', regex=False).str.strip()
+    timetable['TIME'] = timetable['TIME'].astype(str)
+    timetable['TIME'] = timetable['TIME'].str.replace('.', ':', regex=False)
+    timetable['TIME'] = timetable['TIME'].str.replace(r'[–—−]', '-', regex=True)
     timetable['TIME'] = timetable['TIME'].str.replace(r'\s*-\s*', '-', regex=True)
-
+    timetable['TIME'] = timetable['TIME'].str.strip()
     # ------------------------
     # Sidebar filters
     # ------------------------
@@ -152,7 +159,8 @@ def run_streamlit_mode():
     faculties = ["All"] + sorted(timetable["FACULTY"].dropna().unique().tolist())
     departments = ["All"] + sorted(timetable["DEPARTMENT"].dropna().unique().tolist())
     levels = ["All"] + sorted(timetable["LEVEL"].dropna().unique().tolist())
-    days = ["All"] + sorted(timetable["DAY & DATE"].dropna().unique().tolist())
+    # days = ["All"] + sorted(timetable["DAY & DATE"].dropna().unique().tolist())
+    days = ["All"] + timetable_sorted["DAY & DATE"].dropna().unique().tolist()
     times = ["All"] + sorted(timetable["TIME"].dropna().unique().tolist())
     invigilators = ["All"]
     if "INVIG" in timetable.columns:
@@ -177,7 +185,7 @@ def run_streamlit_mode():
     if dept_filter != "All":
         filtered = filtered[filtered["DEPARTMENT"] == dept_filter]
     if level_filter != "All":
-        filtered = filtered[filtered["CLASS"] == level_filter]
+        filtered = filtered[filtered["LEVEL"] == level_filter]
     if day_filter != "All":
         filtered = filtered[filtered["DAY & DATE"] == day_filter]
     if time_filter != "All":
@@ -197,7 +205,7 @@ def run_streamlit_mode():
     # Render table with group colors
     # ------------------------
     def render_table_html_for_streamlit(df):
-        possible_cols = ["DAY & DATE", "TIME", "CLASS", "COURSE CODE", "COURSE TITLE",
+        possible_cols = ["DAY & DATE", "TIME", "LEVEL", "COURSE CODE", "COURSE TITLE",
                          "TOTAL STDS", "NO. OF STDS", "VENUE", "INVIG.", "FACULTY", "DEPARTMENT"]
         display_cols = [c for c in possible_cols if c in df.columns]
 
