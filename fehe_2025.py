@@ -151,7 +151,7 @@ def run_streamlit_mode():
 
     faculties = ["All"] + sorted(timetable["FACULTY"].dropna().unique().tolist())
     departments = ["All"] + sorted(timetable["DEPARTMENT"].dropna().unique().tolist())
-    levels = ["All"] + sorted(timetable["CLASS"].dropna().unique().tolist())
+    levels = ["All"] + sorted(timetable["LEVEL"].dropna().unique().tolist())
     days = ["All"] + sorted(timetable["DAY & DATE"].dropna().unique().tolist())
     times = ["All"] + sorted(timetable["TIME"].dropna().unique().tolist())
     invigilators = ["All"]
