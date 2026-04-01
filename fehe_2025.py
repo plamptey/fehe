@@ -16,6 +16,20 @@ developer_info = "Note there may be errors(confirm with FEHE official timetable)
 # Load timetable
 # timetable = pd.read_csv(csv_path, encoding="windows-1252")
 timetable = pd.read_csv(csv_path, encoding="utf-8-sig")
+# Clean DAY & DATE column
+timetable['DAY & DATE'] = timetable['DAY & DATE'].astype(str)
+
+# Remove extra spaces everywhere
+timetable['DAY & DATE'] = timetable['DAY & DATE'].str.replace(r'\s+', ' ', regex=True)
+
+# Remove spaces after commas
+timetable['DAY & DATE'] = timetable['DAY & DATE'].str.replace(r',\s+', ', ', regex=True)
+
+# Final trim
+timetable['DAY & DATE'] = timetable['DAY & DATE'].str.strip()
+timetable['DATE_ONLY'] = timetable['DAY & DATE'].str.extract(r'([A-Za-z]+ \d{1,2}, \d{4})')[0]
+timetable['DATE_ONLY'] = pd.to_datetime(timetable['DATE_ONLY'], format='%B %d, %Y', errors='coerce')
+
 timetable.columns = timetable.columns.str.strip()
 timetable = timetable.loc[:, ~timetable.columns.str.contains('^Unnamed')]
 # Normalize TIME column (replace dots with colon, strip spaces)
@@ -29,8 +43,8 @@ timetable = timetable.loc[:, ~timetable.columns.str.contains('^Unnamed')]
 # Convert DAY & DATE and TIME to proper sortable types
 # ------------------------
 # Extract date part (remove weekday name)
-timetable['DATE_ONLY'] = timetable['DAY & DATE'].str.extract(r'(\d{1,2}\w{2} \w+, \d{4})')[0]
-timetable['DATE_ONLY'] = pd.to_datetime(timetable['DATE_ONLY'], format='%d%b, %Y', errors='coerce')
+# timetable['DATE_ONLY'] = timetable['DAY & DATE'].str.extract(r'(\d{1,2}\w{2} \w+, \d{4})')[0]
+# timetable['DATE_ONLY'] = pd.to_datetime(timetable['DATE_ONLY'], format='%d%b, %Y', errors='coerce')
 
 # Extract start time
 timetable['START_TIME'] = timetable['TIME'].str.extract(r'(\d{1,2}[:.]\d{2})')[0]
@@ -38,7 +52,6 @@ timetable['START_TIME'] = pd.to_datetime(timetable['START_TIME'], format='%H:%M'
 
 # Sort timetable
 timetable_sorted = timetable.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
-
 # ------------------------
 # Group colors
 # ------------------------
@@ -73,12 +86,13 @@ def run_jupyter_mode():
     # except Exception:
     #     pass
 
-    # df_sorted = timetable_sorted.copy()
-    # row_colors = compute_group_row_colors(df_sorted)
+    df_sorted = timetable_sorted.copy()
+    row_colors = compute_group_row_colors(df_sorted)
 
-    # styles = pd.DataFrame("", index=df_sorted.index, columns=df_sorted.columns)
-    # for idx, color in row_colors.items():
-    #     styles.loc[idx, :] = f"background-color: {color}"
+    styles = pd.DataFrame("", index=df_sorted.index, columns=df_sorted.columns)
+    for idx, color in row_colors.items():
+        styles.loc[idx, :] = f"background-color: {color}"
+
     # Display logos side by side
     col1, col2 = st.columns([1, 5])
     with col1:
@@ -108,7 +122,7 @@ def run_jupyter_mode():
     }]
 
     styler = df_display.style.set_table_styles(header_style)
-    # styler = styler.apply(lambda _: styles, axis=None)
+    styler = styler.apply(lambda _: styles, axis=None)
 
     display(styler)
     print("\n" + developer_info)
@@ -159,7 +173,6 @@ def run_streamlit_mode():
     faculties = ["All"] + sorted(timetable["FACULTY"].dropna().unique().tolist())
     departments = ["All"] + sorted(timetable["DEPARTMENT"].dropna().unique().tolist())
     levels = ["All"] + sorted(timetable["LEVEL"].dropna().unique().tolist())
-    # days = ["All"] + sorted(timetable["DAY & DATE"].dropna().unique().tolist())
     days = ["All"] + timetable_sorted["DAY & DATE"].dropna().unique().tolist()
     times = ["All"] + sorted(timetable["TIME"].dropna().unique().tolist())
     invigilators = ["All"]
@@ -178,7 +191,8 @@ def run_streamlit_mode():
     # ------------------------
     # Apply filters
     # ------------------------
-    filtered = timetable_sorted.copy()
+    # filtered = timetable_sorted.copy()
+    filtered = timetable.copy()
 
     if faculty_filter != "All":
         filtered = filtered[filtered["FACULTY"] == faculty_filter]
@@ -197,7 +211,6 @@ def run_streamlit_mode():
     # Sort chronologically by DATE and START_TIME
     # ------------------------
     filtered = filtered.sort_values(by=['DATE_ONLY', 'START_TIME']).reset_index(drop=True)
-
     # Drop internal sorting columns
     display_df = filtered.drop(columns=['DATE_ONLY', 'START_TIME'], errors='ignore')
 
