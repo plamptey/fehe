@@ -135,9 +135,9 @@ def run_jupyter_mode():
         try:
             st.image("AAMUSTED-LOGO.jpg", width=120)
         except Exception:
-            st.warning("AAMUSTEDlogo not found.")
+            st.warning("USTEDlogo not found.")
 
-    st.title("Nsorhwebere - FEHE AAMUSTED-M 2nd Semester 2025 Examination Timetable")
+    st.title("Nsorhwebere - FEHE USTED-M 2nd Semester 2025 Examination Timetable")
 
     # df_display = df_sorted.copy()
     df_display = timetable_sorted.copy()
@@ -166,7 +166,7 @@ def run_streamlit_mode():
     import smtplib
     from email.mime.text import MIMEText
 
-    st.set_page_config(page_title="DEMO FEHE AAMUSTED-M Exam Timetable", layout="wide")
+    st.set_page_config(page_title="DEMO FEHE USTED-M Exam Timetable", layout="wide")
 
     # Display two logos at opposite ends
     col1, col2, col3 = st.columns([1, 6, 1])
@@ -179,9 +179,9 @@ def run_streamlit_mode():
         try:
             st.image(aamusted_logo, width=120)
         except Exception:
-            st.warning("AAMUSTED logo not found.")
+            st.warning("USTED logo not found.")
 
-    st.title("Nsorhwebere - FEHE AAMUSTED-M 1st Semester 2026 Examination Timetable")
+    st.title("Nsorhwebere - FEHE USTED-M 1st Semester 2026 Examination Timetable")
 
     # # ------------------------
     # # Normalize TIME for consistent filtering
@@ -299,7 +299,7 @@ def run_streamlit_mode():
             email_sender = st.secrets["mail"]["email"]
             email_pass = st.secrets["mail"]["password"]
 
-            msg = MIMEText("✅ You are now subscribed to AAMUSTED exam alerts. Stay tuned!")
+            msg = MIMEText("✅ You are now subscribed to MUSTED exam alerts. Stay tuned!")
             msg["Subject"] = "Exam Timetable Subscription"
             msg["From"] = email_sender
             msg["To"] = student_email
