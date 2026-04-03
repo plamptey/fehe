@@ -17,10 +17,10 @@
 # if st.session_state["last_seen_version"] != APP_VERSION:
     
     # Toast (modern popup)
-    st.toast("🚀 New timetable update available!", icon="🔥")
+st.toast("🚀 New timetable update available!", icon="🔥")
     
-    # Main alert box
-    with st.container():
+# Main alert box
+with st.container():
         st.warning(f"⚠️ You are viewing a new version ({APP_VERSION})")
         st.markdown(WHATS_NEW)
 
@@ -35,6 +35,10 @@
 import pandas as pd
 import sys
 import streamlit as st
+import os
+from datetime import datetime
+from email.mime.text import MIMEText
+import smtplib
 
 # ------------------------
 # Config / Input paths
@@ -63,20 +67,10 @@ timetable['DATE_ONLY'] = pd.to_datetime(timetable['DATE_ONLY'], format='%B %d, %
 
 timetable.columns = timetable.columns.str.strip()
 timetable = timetable.loc[:, ~timetable.columns.str.contains('^Unnamed')]
-# Normalize TIME column (replace dots with colon, strip spaces)
-# timetable['TIME'] = timetable['TIME'].str.replace('.', ':', regex=False).str.strip()
-# # Normalize TIME column: remove spaces, replace different dash characters with standard dash
-# timetable['TIME'] = timetable['TIME'].str.strip()
-# timetable['TIME'] = timetable['TIME'].str.replace(r'[–—−]', '-', regex=True)  # replace en-dash/em-dash/minus
-# timetable['TIME'] = timetable['TIME'].str.replace(r'\s*-\s*', '-', regex=True)  # remove spaces around dash
 
 # ------------------------
 # Convert DAY & DATE and TIME to proper sortable types
 # ------------------------
-# Extract date part (remove weekday name)
-# timetable['DATE_ONLY'] = timetable['DAY & DATE'].str.extract(r'(\d{1,2}\w{2} \w+, \d{4})')[0]
-# timetable['DATE_ONLY'] = pd.to_datetime(timetable['DATE_ONLY'], format='%d%b, %Y', errors='coerce')
-
 # Extract start time
 timetable['START_TIME'] = timetable['TIME'].str.extract(r'(\d{1,2}[:.]\d{2})')[0]
 timetable['START_TIME'] = pd.to_datetime(timetable['START_TIME'], format='%H:%M', errors='coerce').dt.time
@@ -167,6 +161,7 @@ def run_streamlit_mode():
     from email.mime.text import MIMEText
 
     st.set_page_config(page_title="DEMO FEHE USTED-M Exam Timetable", layout="wide")
+
     # ------------------------
     # UPDATE ALERT SYSTEM ✅
     # ------------------------
@@ -179,41 +174,61 @@ def run_streamlit_mode():
     - Cleaned timetable formatting
     - Better time handling
     """
+    # ------------------------
+    # AUTO-DETECT FILE UPDATE
+    # ------------------------
+    file_modified_time = os.path.getmtime(csv_path)
+    last_updated = datetime.fromtimestamp(file_modified_time)
 
-    if "last_seen_version" not in st.session_state:
-        st.session_state["last_seen_version"] = None
+    if "last_seen_update" not in st.session_state:
+        st.session_state["last_seen_update"] = None
 
-    if st.session_state["last_seen_version"] != APP_VERSION:
+    if st.session_state["last_seen_update"] != file_modified_time:
+        
+        st.toast("📢 Timetable updated automatically!", icon="🔄")
 
-        st.toast("🚀 New timetable update available!", icon="🔥")
+        st.warning("⚠️ A new timetable update has been detected.")
 
-        with st.container():
-            st.warning(f"⚠️ You are viewing a new version ({APP_VERSION})")
-            st.markdown(WHATS_NEW)
+        st.markdown(f"**🕒 Last Updated:** {last_updated.strftime('%A, %d %B %Y %I:%M %p')}")
 
-            if st.button("Dismiss Update"):
-                st.session_state["last_seen_version"] = APP_VERSION
-    if "update_shown" not in st.session_state:
-    st.session_state["update_shown"] = False
+        if st.button("Dismiss Update"):
+            st.session_state["last_seen_update"] = file_modified_time
+        
 
-    if not st.session_state["update_shown"]:
-        st.toast("🚀 New timetable update available!", icon="🔥")
-        st.session_state["update_shown"] = True
+        if "last_seen_version" not in st.session_state:
+            st.session_state["last_seen_version"] = None
 
-    # Display two logos at opposite ends
-    col1, col2, col3 = st.columns([1, 6, 1])
-    with col1:
-        try:
-            st.image(nsorhwebere_logo, width=150)
-        except Exception:
-            st.warning("Nsorhwebere logo not found.")
-    with col3:
-        try:
-            st.image(aamusted_logo, width=120)
-        except Exception:
-            st.warning("USTED logo not found.")
+        # if st.session_state["last_seen_version"] != APP_VERSION:
 
-    st.title("Nsorhwebere - FEHE USTED-M 1st Semester 2026 Examination Timetable")
+            st.toast("🚀 New timetable update available!", icon="🔥")
+
+            with st.container():
+                st.warning(f"⚠️ You are viewing a new version ({APP_VERSION})")
+                st.markdown(WHATS_NEW)
+
+                if st.button("Dismiss Update"):
+                    st.session_state["last_seen_version"] = APP_VERSION
+        if "update_shown" not in st.session_state:
+            st.session_state["update_shown"] = False
+
+        if not st.session_state["update_shown"]:
+            st.toast("🚀 New timetable update available!", icon="🔥")
+            st.session_state["update_shown"] = True
+
+        # Display two logos at opposite ends
+        col1, col2, col3 = st.columns([1, 6, 1])
+        with col1:
+            try:
+                st.image(nsorhwebere_logo, width=150)
+            except Exception:
+                st.warning("Nsorhwebere logo not found.")
+        with col3:
+            try:
+                st.image(aamusted_logo, width=120)
+            except Exception:
+                st.warning("USTED logo not found.")
+
+        st.title("Nsorhwebere - FEHE USTED-M 1st Semester 2026 Examination Timetable")
 
     # # ------------------------
     # # Normalize TIME for consistent filtering
@@ -325,25 +340,64 @@ def run_streamlit_mode():
     st.sidebar.header("🔔 Subscribe for Exam Alerts")
     student_email = st.sidebar.text_input("Enter your email")
     subscribe = st.sidebar.button("Subscribe")
-
-    if subscribe and student_email:
+    def save_subscriber(email):
         try:
+            with open("subscribers.txt", "a") as f:
+                f.write(email + "\n")
+        except:
+            pass
+
+    # if subscribe and student_email:
+    #     try:
+    #         email_sender = st.secrets["mail"]["email"]
+    #         email_pass = st.secrets["mail"]["password"]
+
+    #         msg = MIMEText("✅ You are now subscribed to MUSTED exam alerts. Stay tuned!")
+    #         msg["Subject"] = "Exam Timetable Subscription"
+    #         msg["From"] = email_sender
+    #         msg["To"] = student_email
+
+    #         with smtplib.SMTP("smtp.gmail.com", 587) as server:
+    #             server.starttls()
+    #             server.login(email_sender, email_pass)
+    #             server.sendmail(email_sender, [student_email], msg.as_string())
+
+    #         st.sidebar.success("Subscribed! Confirmation email sent.")
+    #     except Exception as e:
+    #         st.sidebar.error(f"Failed to send confirmation: {e}")
+    if subscribe and student_email:
+        save_subscriber(student_email)
+        st.sidebar.success("✅ Subscribed for timetable updates!")
+
+    def send_update_notifications():
+        try:
+            with open("subscribers.txt", "r") as f:
+                emails = list(set([line.strip() for line in f.readlines()]))
+
             email_sender = st.secrets["mail"]["email"]
             email_pass = st.secrets["mail"]["password"]
 
-            msg = MIMEText("✅ You are now subscribed to MUSTED exam alerts. Stay tuned!")
-            msg["Subject"] = "Exam Timetable Subscription"
+            msg = MIMEText("📢 The FEHE timetable has been updated. Check the app for latest schedule.")
+            msg["Subject"] = "📅 Timetable Updated"
             msg["From"] = email_sender
-            msg["To"] = student_email
 
             with smtplib.SMTP("smtp.gmail.com", 587) as server:
                 server.starttls()
                 server.login(email_sender, email_pass)
-                server.sendmail(email_sender, [student_email], msg.as_string())
 
-            st.sidebar.success("Subscribed! Confirmation email sent.")
+                for email in emails:
+                    msg["To"] = email
+                    server.sendmail(email_sender, email, msg.as_string())
+
         except Exception as e:
-            st.sidebar.error(f"Failed to send confirmation: {e}")
+            print("Email error:", e)
+
+    if "last_email_update" not in st.session_state:
+        st.session_state["last_email_update"] = None
+
+    if st.session_state["last_email_update"] != file_modified_time:
+        send_update_notifications()
+        st.session_state["last_email_update"] = file_modified_time
 
     st.markdown("---")
     st.markdown(f"<div style='text-align:center;color:gray'>{developer_info}</div>", unsafe_allow_html=True)
