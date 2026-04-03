@@ -140,10 +140,10 @@ def run_streamlit_mode():
 
     WHATS_NEW = """
     ### 🚀 New Updates
-    - Fixed date sorting issues
-    - Improved filtering accuracy
-    - Cleaned timetable formatting
-    - Better time handling
+    # - Fixed date sorting issues
+    # - Improved filtering accuracy
+    # - Cleaned timetable formatting
+    # - Better time handling
     """
     # ------------------------
     # AUTO-DETECT FILE UPDATE
