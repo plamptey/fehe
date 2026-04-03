@@ -141,6 +141,7 @@ def run_streamlit_mode():
     from email.mime.text import MIMEText
 
     st.set_page_config(page_title="DEMO FEHE USTED-M Exam Timetable", layout="wide")
+    st.toast("🚀 New timetable update available!", icon="🔥")
 
     # ------------------------
     # UPDATE ALERT SYSTEM ✅
@@ -165,7 +166,8 @@ def run_streamlit_mode():
 
     if st.session_state["last_seen_update"] != file_modified_time:
         
-        st.toast("📢 Timetable updated automatically!", icon="🔄")
+        # st.toast("📢🚀 Timetable updated automatically!", icon="🔄")
+        st.toast("📢 Timetable updated!", icon="🔥")
 
         st.warning("⚠️ A new timetable update has been detected.")
 
@@ -178,7 +180,7 @@ def run_streamlit_mode():
         if "last_seen_version" not in st.session_state:
             st.session_state["last_seen_version"] = None
 
-        # if st.session_state["last_seen_version"] != APP_VERSION:
+        if st.session_state["last_seen_version"] != APP_VERSION:
 
             st.toast("🚀 New timetable update available!", icon="🔥")
 
