@@ -1,20 +1,20 @@
-APP_VERSION = "1.1.0"
+# APP_VERSION = "1.1.1"
 
-WHATS_NEW = """
-### 🚀 New Updates
-- Fixed date sorting issues
-- Improved filtering accuracy
-- Cleaned timetable formatting
-- Better time handling
-"""
+# WHATS_NEW = """
+# ### 🚀 New Updates
+# - Fixed date sorting issues
+# - Improved filtering accuracy
+# - Cleaned timetable formatting
+# - Better time handling
+# """
 
-# ------------------------
-# UPDATE ALERT SYSTEM
-# ------------------------
-if "last_seen_version" not in st.session_state:
-    st.session_state["last_seen_version"] = None
+# # ------------------------
+# # UPDATE ALERT SYSTEM
+# # ------------------------
+# if "last_seen_version" not in st.session_state:
+#     st.session_state["last_seen_version"] = None
 
-if st.session_state["last_seen_version"] != APP_VERSION:
+# if st.session_state["last_seen_version"] != APP_VERSION:
     
     # Toast (modern popup)
     st.toast("🚀 New timetable update available!", icon="🔥")
@@ -167,6 +167,38 @@ def run_streamlit_mode():
     from email.mime.text import MIMEText
 
     st.set_page_config(page_title="DEMO FEHE USTED-M Exam Timetable", layout="wide")
+    # ------------------------
+    # UPDATE ALERT SYSTEM ✅
+    # ------------------------
+    APP_VERSION = "1.1.0"
+
+    WHATS_NEW = """
+    ### 🚀 New Updates
+    - Fixed date sorting issues
+    - Improved filtering accuracy
+    - Cleaned timetable formatting
+    - Better time handling
+    """
+
+    if "last_seen_version" not in st.session_state:
+        st.session_state["last_seen_version"] = None
+
+    if st.session_state["last_seen_version"] != APP_VERSION:
+
+        st.toast("🚀 New timetable update available!", icon="🔥")
+
+        with st.container():
+            st.warning(f"⚠️ You are viewing a new version ({APP_VERSION})")
+            st.markdown(WHATS_NEW)
+
+            if st.button("Dismiss Update"):
+                st.session_state["last_seen_version"] = APP_VERSION
+    if "update_shown" not in st.session_state:
+    st.session_state["update_shown"] = False
+
+    if not st.session_state["update_shown"]:
+        st.toast("🚀 New timetable update available!", icon="🔥")
+        st.session_state["update_shown"] = True
 
     # Display two logos at opposite ends
     col1, col2, col3 = st.columns([1, 6, 1])
