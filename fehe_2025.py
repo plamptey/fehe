@@ -201,7 +201,6 @@ def run_streamlit_mode():
 
             if st.button("Dismiss Update", key="dismiss_update_btn"):
                 st.session_state["last_seen_update"] = file_modified_time
-
     show_update_alert()
 
     # Display two logos at opposite ends
