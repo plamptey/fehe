@@ -162,8 +162,7 @@ def run_streamlit_mode():
         st.warning("⚠️ A new timetable update has been detected.")
 
         st.markdown(f"**🕒 Last Updated:** {last_updated.strftime('%A, %d %B %Y %I:%M %p')}")
-
-        # if st.button("Dismiss Update"):
+  
         if st.button("Dismiss Update", key="dismiss_update_btn"):
             st.session_state["last_seen_update"] = file_modified_time
         
@@ -178,8 +177,6 @@ def run_streamlit_mode():
                 st.warning(f"⚠️ You are viewing a new version ({APP_VERSION})")
                 st.markdown(WHATS_NEW)
 
-                # if st.button("Dismiss Update"):
-                #     st.session_state["last_seen_version"] = APP_VERSION
         if "update_shown" not in st.session_state:
             st.session_state["update_shown"] = False
 
@@ -201,7 +198,6 @@ def run_streamlit_mode():
                 st.warning("USTED logo not found.")
 
         st.title("Nsorhwebere - FEHE USTED-M 1st Semester 2026 Examination Timetable")
-
 
     # ------------------------
     # Clean TIME BEFORE sorting
