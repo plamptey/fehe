@@ -1,14 +1,4 @@
 
-# Main alert box
-with st.container():
-        st.warning(f"⚠️ You are viewing a new version ({APP_VERSION})")
-        st.markdown(WHATS_NEW)
-
-        col1, col2 = st.columns([1, 5])
-        with col1:
-            if st.button("Dismiss"):
-                st.session_state["last_seen_version"] = APP_VERSION
-
 #!/usr/bin/env python
 # coding: utf-8
 
