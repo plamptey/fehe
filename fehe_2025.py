@@ -163,10 +163,10 @@ def run_streamlit_mode():
 
         st.markdown(f"**🕒 Last Updated:** {last_updated.strftime('%A, %d %B %Y %I:%M %p')}")
 
-        if st.button("Dismiss Update"):
+        # if st.button("Dismiss Update"):
+        if st.button("Dismiss Update", key="dismiss_update_btn"):
             st.session_state["last_seen_update"] = file_modified_time
         
-
         if "last_seen_version" not in st.session_state:
             st.session_state["last_seen_version"] = None
 
@@ -178,8 +178,8 @@ def run_streamlit_mode():
                 st.warning(f"⚠️ You are viewing a new version ({APP_VERSION})")
                 st.markdown(WHATS_NEW)
 
-                if st.button("Dismiss Update"):
-                    st.session_state["last_seen_version"] = APP_VERSION
+                # if st.button("Dismiss Update"):
+                #     st.session_state["last_seen_version"] = APP_VERSION
         if "update_shown" not in st.session_state:
             st.session_state["update_shown"] = False
 
@@ -202,11 +202,7 @@ def run_streamlit_mode():
 
         st.title("Nsorhwebere - FEHE USTED-M 1st Semester 2026 Examination Timetable")
 
-    # # ------------------------
-    # # Normalize TIME for consistent filtering
-    # # ------------------------
-    # timetable['TIME'] = timetable['TIME'].str.replace('.', ':', regex=False).str.strip()
-    # timetable['TIME'] = timetable['TIME'].str.replace(r'\s*-\s*', '-', regex=True)
+
     # ------------------------
     # Clean TIME BEFORE sorting
     # ------------------------
