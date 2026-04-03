@@ -211,11 +211,11 @@ def run_streamlit_mode():
             st.image(nsorhwebere_logo, width=150)
         except Exception:
                 st.warning("Nsorhwebere logo not found.")
-        with col3:
-            try:
-                st.image(aamusted_logo, width=120)
-            except Exception:
-                st.warning("USTED logo not found.")
+    with col3:
+        try:
+            st.image(aamusted_logo, width=120)
+        except Exception:
+            st.warning("USTED logo not found.")
 
         st.title("Nsorhwebere - FEHE USTED-M 1st Semester 2026 Examination Timetable")
 
