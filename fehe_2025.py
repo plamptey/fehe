@@ -190,26 +190,26 @@ def run_streamlit_mode():
         if "last_seen_update" not in st.session_state:
             st.session_state["last_seen_update"] = None
 
-        if st.session_state["last_seen_update"] != LAST_UPDATED:
+        if st.session_state["last_seen_update"] != file_modified_time:
 
             st.toast("🚀 New timetable update available!", icon="🔥")
 
             st.warning("⚠️ A new timetable update has been detected.")
-            st.info(f"🕒 Last Updated: {LAST_UPDATED}")
+            st.info(f"🕒 Last Updated: {last_updated.strftime('%A, %d %B %Y %I:%M %p')}")
 
             st.markdown(WHATS_NEW)
 
             if st.button("Dismiss Update", key="dismiss_update_btn"):
-                st.session_state["last_seen_update"] = LAST_UPDATED
+                st.session_state["last_seen_update"] = file_modified_time
 
     show_update_alert()
 
-        # Display two logos at opposite ends
-        col1, col2, col3 = st.columns([1, 6, 1])
-        with col1:
-            try:
-                st.image(nsorhwebere_logo, width=150)
-            except Exception:
+    # Display two logos at opposite ends
+    col1, col2, col3 = st.columns([1, 6, 1])
+    with col1:
+        try:
+            st.image(nsorhwebere_logo, width=150)
+        except Exception:
                 st.warning("Nsorhwebere logo not found.")
         with col3:
             try:
