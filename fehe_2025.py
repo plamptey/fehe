@@ -9,11 +9,17 @@ import os
 from datetime import datetime
 from email.mime.text import MIMEText
 import smtplib
+import time
 
 # ------------------------
 # Config / Input paths
 # ------------------------
 csv_path = "fehe_final_26.csv"
+ # ------------------------
+# AUTO-DETECT FILE UPDATE
+ # ------------------------
+file_modified_time = os.path.getmtime(csv_path)
+last_updated = datetime.fromtimestamp(file_modified_time)
 aamusted_logo = "AAMUSTED-LOGO.jpg"
 nsorhwebere_logo = "nsorhwebere_logo.png"
 developer_info = "Note there may be errors(confirm with FEHE official timetable)👨‍💻 Developed by: Patrick Nii Lante Lamptey | 📞 +233-208 426 593"
@@ -121,7 +127,52 @@ def run_jupyter_mode():
 
     display(styler)
     print("\n" + developer_info)
+def save_subscriber(email):
+    try:
+        with open("subscribers.txt", "a") as f:
+                f.write(email + "\n")
+    except:
+        pass
+   
+def send_update_notifications():
+    try:
+        with open("subscribers.txt", "r") as f:
+            emails = list(set([line.strip() for line in f.readlines()]))
 
+        email_sender = st.secrets["mail"]["email"]
+        email_pass = st.secrets["mail"]["password"]
+
+        msg = MIMEText("📢 The FEHE timetable has been updated. Check the app for latest schedule.")
+        msg["Subject"] = "📅 Timetable Updated"
+        msg["From"] = email_sender
+
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(email_sender, email_pass)
+
+            for email in emails:
+                msg["To"] = email
+                server.sendmail(email_sender, email, msg.as_string())
+
+    except Exception as e:
+        print("Email error:", e)
+
+    if "last_email_update" not in st.session_state:
+        st.session_state["last_email_update"] = None
+
+    if st.session_state["last_email_update"] != file_modified_time:
+        send_update_notifications()
+        st.session_state["last_email_update"] = file_modified_time
+def get_last_sent_time():
+    try:
+        with open("last_update.txt", "r") as f:
+            return float(f.read().strip())
+    except:
+        return None
+
+def save_last_sent_time(timestamp):
+    with open("last_update.txt", "w") as f:
+        f.write(str(timestamp))
 # ------------------------
 # Streamlit mode
 # ------------------------
@@ -145,11 +196,11 @@ def run_streamlit_mode():
     # - Improved filtering accuracy
     # - Cleaned timetable formatting
     # - Better time handling
-    # ------------------------
-    # AUTO-DETECT FILE UPDATE
-    # ------------------------
-    file_modified_time = os.path.getmtime(csv_path)
-    last_updated = datetime.fromtimestamp(file_modified_time)
+    # # ------------------------
+    # # AUTO-DETECT FILE UPDATE
+    # # ------------------------
+    # file_modified_time = os.path.getmtime(csv_path)
+    # last_updated = datetime.fromtimestamp(file_modified_time)
 
     # if "last_seen_update" not in st.session_state:
     #     st.session_state["last_seen_update"] = None
@@ -320,70 +371,31 @@ def run_streamlit_mode():
     # ------------------------
     # Subscription form
     # ------------------------
-    st.sidebar.header("🔔 Subscribe for Exam Alerts")
+    st.sidebar.header("🔔 Subscribe for Time Table Updates & Exam Alerts")
     student_email = st.sidebar.text_input("Enter your email")
     subscribe = st.sidebar.button("Subscribe")
-    def save_subscriber(email):
-        try:
-            with open("subscribers.txt", "a") as f:
-                f.write(email + "\n")
-        except:
-            pass
+    if subscribe:
+        if student_email:
+            save_subscriber(student_email)
+            st.sidebar.success("✅ Subscribed for timetable updates!")
+        else:
+            st.sidebar.warning("⚠️ Please enter a valid email")
+  
+MIN_INTERVAL = 300  # 5 minutes
 
-    # if subscribe and student_email:
-    #     try:
-    #         email_sender = st.secrets["mail"]["email"]
-    #         email_pass = st.secrets["mail"]["password"]
+last_sent_time = get_last_sent_time()
 
-    #         msg = MIMEText("✅ You are now subscribed to MUSTED exam alerts. Stay tuned!")
-    #         msg["Subject"] = "Exam Timetable Subscription"
-    #         msg["From"] = email_sender
-    #         msg["To"] = student_email
+if last_sent_time is None or file_modified_time > last_sent_time:
 
-    #         with smtplib.SMTP("smtp.gmail.com", 587) as server:
-    #             server.starttls()
-    #             server.login(email_sender, email_pass)
-    #             server.sendmail(email_sender, [student_email], msg.as_string())
+    if last_sent_time is None or (file_modified_time - last_sent_time > MIN_INTERVAL):
 
-    #         st.sidebar.success("Subscribed! Confirmation email sent.")
-    #     except Exception as e:
-    #         st.sidebar.error(f"Failed to send confirmation: {e}")
-    if subscribe and student_email:
-        save_subscriber(student_email)
-        st.sidebar.success("✅ Subscribed for timetable updates!")
-
-    def send_update_notifications():
-        try:
-            with open("subscribers.txt", "r") as f:
-                emails = list(set([line.strip() for line in f.readlines()]))
-
-            email_sender = st.secrets["mail"]["email"]
-            email_pass = st.secrets["mail"]["password"]
-
-            msg = MIMEText("📢 The FEHE timetable has been updated. Check the app for latest schedule.")
-            msg["Subject"] = "📅 Timetable Updated"
-            msg["From"] = email_sender
-
-            with smtplib.SMTP("smtp.gmail.com", 587) as server:
-                server.starttls()
-                server.login(email_sender, email_pass)
-
-                for email in emails:
-                    msg["To"] = email
-                    server.sendmail(email_sender, email, msg.as_string())
-
-        except Exception as e:
-            print("Email error:", e)
-
-    if "last_email_update" not in st.session_state:
-        st.session_state["last_email_update"] = None
-
-    if st.session_state["last_email_update"] != file_modified_time:
         send_update_notifications()
-        st.session_state["last_email_update"] = file_modified_time
+        save_last_sent_time(file_modified_time)
 
-    st.markdown("---")
-    st.markdown(f"<div style='text-align:center;color:gray'>{developer_info}</div>", unsafe_allow_html=True)
+        st.success("📧 Update notification sent!")
+
+st.markdown("---")
+st.markdown(f"<div style='text-align:center;color:gray'>{developer_info}</div>", unsafe_allow_html=True)
 
 # ------------------------
 # Auto-detect environment
