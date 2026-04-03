@@ -217,7 +217,7 @@ def run_streamlit_mode():
         except Exception:
             st.warning("USTED logo not found.")
 
-        st.title("Nsorhwebere - FEHE USTED-M 1st Semester 2026 Examination Timetable")
+    st.title("Nsorhwebere - FEHE USTED-M 1st Semester 2026 Examination Timetable")
 
     # ------------------------
     # Clean TIME BEFORE sorting
