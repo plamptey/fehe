@@ -1,24 +1,4 @@
-# APP_VERSION = "1.1.1"
 
-# WHATS_NEW = """
-# ### 🚀 New Updates
-# - Fixed date sorting issues
-# - Improved filtering accuracy
-# - Cleaned timetable formatting
-# - Better time handling
-# """
-
-# # ------------------------
-# # UPDATE ALERT SYSTEM
-# # ------------------------
-# if "last_seen_version" not in st.session_state:
-#     st.session_state["last_seen_version"] = None
-
-# if st.session_state["last_seen_version"] != APP_VERSION:
-    
-    # Toast (modern popup)
-st.toast("🚀 New timetable update available!", icon="🔥")
-    
 # Main alert box
 with st.container():
         st.warning(f"⚠️ You are viewing a new version ({APP_VERSION})")
