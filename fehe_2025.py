@@ -151,38 +151,58 @@ def run_streamlit_mode():
     file_modified_time = os.path.getmtime(csv_path)
     last_updated = datetime.fromtimestamp(file_modified_time)
 
-    if "last_seen_update" not in st.session_state:
-        st.session_state["last_seen_update"] = None
+    # if "last_seen_update" not in st.session_state:
+    #     st.session_state["last_seen_update"] = None
 
-    if st.session_state["last_seen_update"] != file_modified_time:
+    # if st.session_state["last_seen_update"] != file_modified_time:
         
-        # st.toast("📢🚀 Timetable updated automatically!", icon="🔄")
-        st.toast("📢 Timetable updated!", icon="🔥")
+    #     # st.toast("📢🚀 Timetable updated automatically!", icon="🔄")
+    #     st.toast("📢 Timetable updated!", icon="🔥")
 
-        st.warning("⚠️ A new timetable update has been detected.")
+    #     st.warning("⚠️ A new timetable update has been detected.")
 
-        st.markdown(f"**🕒 Last Updated:** {last_updated.strftime('%A, %d %B %Y %I:%M %p')}")
+    #     st.markdown(f"**🕒 Last Updated:** {last_updated.strftime('%A, %d %B %Y %I:%M %p')}")
   
-        if st.button("Dismiss Update", key="dismiss_update_btn"):
-            st.session_state["last_seen_update"] = file_modified_time
+    #     if st.button("Dismiss Update", key="dismiss_update_btn"):
+    #         st.session_state["last_seen_update"] = file_modified_time
         
-        if "last_seen_version" not in st.session_state:
-            st.session_state["last_seen_version"] = None
+    #     if "last_seen_version" not in st.session_state:
+    #         st.session_state["last_seen_version"] = None
 
-        if st.session_state["last_seen_version"] != APP_VERSION:
+    #     if st.session_state["last_seen_version"] != APP_VERSION:
+
+    #         st.toast("🚀 New timetable update available!", icon="🔥")
+
+    #         with st.container():
+    #             st.warning(f"⚠️ You are viewing a new version ({APP_VERSION})")
+    #             st.markdown(WHATS_NEW)
+
+    #     if "update_shown" not in st.session_state:
+    #         st.session_state["update_shown"] = False
+
+    #     if not st.session_state["update_shown"]:
+    #         st.toast("🚀 New timetable update available!", icon="🔥")
+    #         st.session_state["update_shown"] = True
+    # ------------------------
+    # UPDATE ALERT (SAFE VERSION)
+    # ------------------------
+    def show_update_alert():
+        if "last_seen_update" not in st.session_state:
+            st.session_state["last_seen_update"] = None
+
+        if st.session_state["last_seen_update"] != LAST_UPDATED:
 
             st.toast("🚀 New timetable update available!", icon="🔥")
 
-            with st.container():
-                st.warning(f"⚠️ You are viewing a new version ({APP_VERSION})")
-                st.markdown(WHATS_NEW)
+            st.warning("⚠️ A new timetable update has been detected.")
+            st.info(f"🕒 Last Updated: {LAST_UPDATED}")
 
-        if "update_shown" not in st.session_state:
-            st.session_state["update_shown"] = False
+            st.markdown(WHATS_NEW)
 
-        if not st.session_state["update_shown"]:
-            st.toast("🚀 New timetable update available!", icon="🔥")
-            st.session_state["update_shown"] = True
+            if st.button("Dismiss Update", key="dismiss_update_btn"):
+                st.session_state["last_seen_update"] = LAST_UPDATED
+
+    show_update_alert()
 
         # Display two logos at opposite ends
         col1, col2, col3 = st.columns([1, 6, 1])
