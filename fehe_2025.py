@@ -138,13 +138,13 @@ def run_streamlit_mode():
     # ------------------------
     APP_VERSION = "1.1.0"
 
-    WHATS_NEW = """
-    ### 🚀 New Updates
-    - Fixed date sorting issues
-    - Improved filtering accuracy
-    - Cleaned timetable formatting
-    - Better time handling
-    """
+    # WHATS_NEW = """
+    # ### 🚀 New Updates
+    # - Fixed date sorting issues
+    # - Improved filtering accuracy
+    # - Cleaned timetable formatting
+    # - Better time handling
+    # """
     # ------------------------
     # AUTO-DETECT FILE UPDATE
     # ------------------------
