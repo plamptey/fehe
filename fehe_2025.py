@@ -157,12 +157,12 @@ def send_update_notifications():
     except Exception as e:
         print("Email error:", e)
 
-    if "last_email_update" not in st.session_state:
-        st.session_state["last_email_update"] = None
+    # if "last_email_update" not in st.session_state:
+    #     st.session_state["last_email_update"] = None
 
-    if st.session_state["last_email_update"] != file_modified_time:
-        send_update_notifications()
-        st.session_state["last_email_update"] = file_modified_time
+    # if st.session_state["last_email_update"] != file_modified_time:
+    #     send_update_notifications()
+    #     st.session_state["last_email_update"] = file_modified_time
 def get_last_sent_time():
     try:
         with open("last_update.txt", "r") as f:
@@ -192,48 +192,7 @@ def run_streamlit_mode():
     WHATS_NEW = """
     ### 🚀 New Updates
       """
-      # - Fixed date sorting issues
-    # - Improved filtering accuracy
-    # - Cleaned timetable formatting
-    # - Better time handling
-    # # ------------------------
-    # # AUTO-DETECT FILE UPDATE
-    # # ------------------------
-    # file_modified_time = os.path.getmtime(csv_path)
-    # last_updated = datetime.fromtimestamp(file_modified_time)
 
-    # if "last_seen_update" not in st.session_state:
-    #     st.session_state["last_seen_update"] = None
-
-    # if st.session_state["last_seen_update"] != file_modified_time:
-        
-    #     # st.toast("📢🚀 Timetable updated automatically!", icon="🔄")
-    #     st.toast("📢 Timetable updated!", icon="🔥")
-
-    #     st.warning("⚠️ A new timetable update has been detected.")
-
-    #     st.markdown(f"**🕒 Last Updated:** {last_updated.strftime('%A, %d %B %Y %I:%M %p')}")
-  
-    #     if st.button("Dismiss Update", key="dismiss_update_btn"):
-    #         st.session_state["last_seen_update"] = file_modified_time
-        
-    #     if "last_seen_version" not in st.session_state:
-    #         st.session_state["last_seen_version"] = None
-
-    #     if st.session_state["last_seen_version"] != APP_VERSION:
-
-    #         st.toast("🚀 New timetable update available!", icon="🔥")
-
-    #         with st.container():
-    #             st.warning(f"⚠️ You are viewing a new version ({APP_VERSION})")
-    #             st.markdown(WHATS_NEW)
-
-    #     if "update_shown" not in st.session_state:
-    #         st.session_state["update_shown"] = False
-
-    #     if not st.session_state["update_shown"]:
-    #         st.toast("🚀 New timetable update available!", icon="🔥")
-    #         st.session_state["update_shown"] = True
     # ------------------------
     # UPDATE ALERT (SAFE VERSION)
     # ------------------------
@@ -381,16 +340,21 @@ def run_streamlit_mode():
         else:
             st.sidebar.warning("⚠️ Please enter a valid email")
   
+# ------------------------
+# SMART EMAIL ALERT SYSTEM ✅
+# ------------------------
 MIN_INTERVAL = 300  # 5 minutes
 
-last_sent_time = get_last_sent_time()
+if "last_sent_time" not in st.session_state:
+    st.session_state["last_sent_time"] = 0
 
-if last_sent_time is None or file_modified_time > last_sent_time:
-
-    if last_sent_time is None or (file_modified_time - last_sent_time > MIN_INTERVAL):
+# Only send if file updated AND enough time passed
+if file_modified_time > st.session_state["last_sent_time"]:
+    if (time.time() - st.session_state["last_sent_time"]) > MIN_INTERVAL:
 
         send_update_notifications()
-        save_last_sent_time(file_modified_time)
+
+        st.session_state["last_sent_time"] = time.time()
 
         st.success("📧 Update notification sent!")
 
