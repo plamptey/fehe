@@ -183,7 +183,7 @@ def send_whatsapp_notifications():
         numbers = list(set([line.strip() for line in f.readlines()]))
 
     for number in numbers:
-        url = f"https://api.callmebot.com/whatsapp.php?phone={number}&text=📢 Timetable Updated! Check app&apikey=YOUR_API_KEY"
+        url = f"https://api.callmebot.com/whatsapp.php?phone={number}&text=📢 Timetable Updated! Check app&apikey=1234567"
         requests.get(url)
 def get_last_sent_time():
     try:
@@ -356,6 +356,12 @@ def run_streamlit_mode():
     # student_email = st.sidebar.text_input("Enter your email")
     student_phone = st.sidebar.text_input("Enter WhatsApp number (e.g. +233XXXXXXXXX)")
     subscribe = st.sidebar.button("Subscribe")
+    if subscribe:
+        if student_phone:
+            save_subscriber(student_phone)
+            st.sidebar.success("✅ Subscribed for WhatsApp alerts!")
+        else:
+            st.sidebar.warning("⚠️ Enter a valid phone number")
 def save_subscriber(phone):
     try:
         with open("subscribers.txt", "a") as f:
@@ -363,17 +369,17 @@ def save_subscriber(phone):
     except:
         pass
 
-    if subscribe:
-        # if student_email:
-        #     save_subscriber(student_email)
-        #     st.sidebar.success("✅ Subscribed for timetable updates!")
-        # else:
-        #     st.sidebar.warning("⚠️ Please enter a valid email")
-        if student_phone:
-            save_subscriber(student_phone)
-            st.sidebar.success("✅ Subscribed for WhatsApp alerts!")
-        else:
-            st.sidebar.warning("⚠️ Enter a valid phone number")
+    # if subscribe:
+    #     # if student_email:
+    #     #     save_subscriber(student_email)
+    #     #     st.sidebar.success("✅ Subscribed for timetable updates!")
+    #     # else:
+    #     #     st.sidebar.warning("⚠️ Please enter a valid email")
+    #     if student_phone:
+    #         save_subscriber(student_phone)
+    #         st.sidebar.success("✅ Subscribed for WhatsApp alerts!")
+    #     else:
+    #         st.sidebar.warning("⚠️ Enter a valid phone number")
   
 # ------------------------
 # SMART EMAIL ALERT SYSTEM ✅
