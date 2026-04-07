@@ -346,8 +346,10 @@ def run_streamlit_mode():
                 df_display["DAY & DATE"].shift() == df_display["DAY & DATE"]
             )
 
-        th_style = "background:#4CAF50;color:white;padding:8px;text-align:center;"
-        td_style = "padding:8px;border-bottom:1px solid #ddd;vertical-align:top;"
+        # th_style = "background:#4CAF50;color:white;padding:8px;text-align:center;"
+        # td_style = "padding:8px;border-bottom:1px solid #ddd;vertical-align:top;"
+        th_style = """background:#4CAF50;color:white;padding:8px;text-align:center;position:sticky;top:0;z-index:2;"""
+        td_style = "padding:8px;border-bottom:1px solid #ddd;"
 
         html = "<div style='overflow-x:auto;'><table style='border-collapse:collapse;width:100%;'>"
         html += "<thead><tr>"
@@ -362,7 +364,10 @@ def run_streamlit_mode():
             for col in display_cols:
                 val = row.get(col, "")
                 cell = "" if pd.isna(val) else str(val)
-                html += f"<td style='{td_style}'>{cell}</td>"
+                if col == "DAY & DATE":
+                    html += f"<td style='{td_style};position:sticky;left:0;background:#fff;z-index:1;font-weight:bold'>{cell}</td>"
+                else:
+                    html += f"<td style='{td_style}'>{cell}</td>"
             html += "</tr>"
         html += "</tbody></table></div>"
         return html
