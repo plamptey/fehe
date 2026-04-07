@@ -351,6 +351,7 @@ def run_streamlit_mode():
         th_style = """background:#4CAF50;color:white;padding:8px;text-align:center;position:sticky;top:0;z-index:2;"""
         td_style = "padding:8px;border-bottom:1px solid #ddd;"
 
+
         html = "<div style='overflow-x:auto;'><table style='border-collapse:collapse;width:100%;'>"
         html += "<thead><tr>"
         for col in display_cols:
