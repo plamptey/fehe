@@ -124,8 +124,8 @@ def run_jupyter_mode():
 
     # df_display = df_sorted.copy()
     df_display = timetable_sorted.copy()
-    if "DAY & DATE" in df_display.columns:
-        df_display["DAY & DATE"] = df_display["DAY & DATE"].mask(df_display["DAY & DATE"].duplicated())
+    # if "DAY & DATE" in df_display.columns:
+    #     df_display["DAY & DATE"] = df_display["DAY & DATE"].mask(df_display["DAY & DATE"].duplicated())
 
     header_style = [{
         'selector': 'thead th',
