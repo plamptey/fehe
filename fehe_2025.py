@@ -27,7 +27,19 @@ developer_info = "Note there may be errors(confirm with FEHE official timetable)
 
 # Load timetable
 # timetable = pd.read_csv(csv_path, encoding="windows-1252")
-timetable = pd.read_csv(csv_path, encoding="utf-8-sig")
+def load_csv_safely(path):
+    encodings = ["utf-8-sig", "utf-8", "latin1", "cp1252"]
+
+    for enc in encodings:
+        try:
+            return pd.read_csv(path, encoding=enc)
+        except Exception:
+            continue
+
+    raise ValueError("❌ Could not read the CSV file with known encodings")
+
+timetable = load_csv_safely(csv_path)
+# timetable = pd.read_csv(csv_path, encoding="utf-8-sig")
 # Clean DAY & DATE column
 timetable['DAY & DATE'] = timetable['DAY & DATE'].astype(str)
 
