@@ -1,7 +1,7 @@
 
 #!/usr/bin/env python
 # coding: utf-8
-
+!pip install twilio
 import pandas as pd
 import sys
 import streamlit as st
@@ -14,7 +14,8 @@ import time
 # ------------------------
 # Config / Input paths
 # ------------------------
-csv_path = "fehe_final_26.csv"
+csv_path = "comp_tt_040426.csv"
+# csv_path = "fehe_final_26.csv"
  # ------------------------
 # AUTO-DETECT FILE UPDATE
  # ------------------------
@@ -134,35 +135,56 @@ def save_subscriber(email):
     except:
         pass
    
-def send_update_notifications():
-    try:
-        with open("subscribers.txt", "r") as f:
-            emails = list(set([line.strip() for line in f.readlines()]))
+# def send_update_notifications():
+#     try:
+#         with open("subscribers.txt", "r") as f:
+#             emails = list(set([line.strip() for line in f.readlines()]))
 
-        email_sender = st.secrets["mail"]["email"]
-        email_pass = st.secrets["mail"]["password"]
+#         email_sender = st.secrets["mail"]["email"]
+#         email_pass = st.secrets["mail"]["password"]
 
-        msg = MIMEText("📢 The FEHE timetable has been updated. Check the app for latest schedule.")
-        msg["Subject"] = "📅 Timetable Updated"
-        msg["From"] = email_sender
+#         msg = MIMEText("📢 The FEHE timetable has been updated. Check the app for latest schedule.")
+#         msg["Subject"] = "📅 Timetable Updated"
+#         msg["From"] = email_sender
 
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(email_sender, email_pass)
+#         with smtplib.SMTP("smtp.gmail.com", 587) as server:
+#             server.starttls()
+#             server.login(email_sender, email_pass)
 
-            for email in emails:
-                msg["To"] = email
-                server.sendmail(email_sender, email, msg.as_string())
+#             for email in emails:
+#                 msg["To"] = email
+#                 server.sendmail(email_sender, email, msg.as_string())
 
-    except Exception as e:
-        print("Email error:", e)
+#     except Exception as e:
+#         print("Email error:", e)
+# from twilio.rest import Client
 
-    # if "last_email_update" not in st.session_state:
-    #     st.session_state["last_email_update"] = None
+# def send_whatsapp_notifications():
+#     try:
+#         with open("subscribers.txt", "r") as f:
+#             numbers = list(set([line.strip() for line in f.readlines()]))
 
-    # if st.session_state["last_email_update"] != file_modified_time:
-    #     send_update_notifications()
-    #     st.session_state["last_email_update"] = file_modified_time
+#         client = Client(st.secrets["twilio"]["account_sid"],
+#                         st.secrets["twilio"]["auth_token"])
+
+#         for number in numbers:
+#             client.messages.create(
+#                 body="📢 FEHE Timetable Updated!\nCheck the app now.",
+#                 from_="whatsapp:+14155238886",  # Twilio sandbox number
+#                 to=f"whatsapp:{number}"
+#             )
+
+#     except Exception as e:
+#         print("WhatsApp error:", e)
+import requests
+
+def send_whatsapp_notifications():
+    with open("subscribers.txt", "r") as f:
+        numbers = list(set([line.strip() for line in f.readlines()]))
+
+    for number in numbers:
+        url = f"https://api.callmebot.com/whatsapp.php?phone={number}&text=📢 Timetable Updated! Check app&apikey=YOUR_API_KEY"
+        requests.get(url)
 def get_last_sent_time():
     try:
         with open("last_update.txt", "r") as f:
@@ -331,14 +353,27 @@ def run_streamlit_mode():
     # Subscription form
     # ------------------------
     st.sidebar.header("🔔 Subscribe for Time Table Updates & Exam Alerts")
-    student_email = st.sidebar.text_input("Enter your email")
+    # student_email = st.sidebar.text_input("Enter your email")
+    student_phone = st.sidebar.text_input("Enter WhatsApp number (e.g. +233XXXXXXXXX)")
     subscribe = st.sidebar.button("Subscribe")
+def save_subscriber(phone):
+    try:
+        with open("subscribers.txt", "a") as f:
+            f.write(phone + "\n")
+    except:
+        pass
+
     if subscribe:
-        if student_email:
-            save_subscriber(student_email)
-            st.sidebar.success("✅ Subscribed for timetable updates!")
+        # if student_email:
+        #     save_subscriber(student_email)
+        #     st.sidebar.success("✅ Subscribed for timetable updates!")
+        # else:
+        #     st.sidebar.warning("⚠️ Please enter a valid email")
+        if student_phone:
+            save_subscriber(student_phone)
+            st.sidebar.success("✅ Subscribed for WhatsApp alerts!")
         else:
-            st.sidebar.warning("⚠️ Please enter a valid email")
+            st.sidebar.warning("⚠️ Enter a valid phone number")
   
 # ------------------------
 # SMART EMAIL ALERT SYSTEM ✅
@@ -351,11 +386,10 @@ if "last_sent_time" not in st.session_state:
 # Only send if file updated AND enough time passed
 if file_modified_time > st.session_state["last_sent_time"]:
     if (time.time() - st.session_state["last_sent_time"]) > MIN_INTERVAL:
-
-        send_update_notifications()
+        # send_update_notifications()
+        send_whatsapp_notifications()
 
         st.session_state["last_sent_time"] = time.time()
-
         st.success("📧 Update notification sent!")
 
 st.markdown("---")
