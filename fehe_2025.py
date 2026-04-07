@@ -190,12 +190,22 @@ def save_subscriber(email):
 #         print("WhatsApp error:", e)
 import requests
 
+# def send_whatsapp_notifications():
+#     with open("subscribers.txt", "r") as f:
+#         numbers = list(set([line.strip() for line in f.readlines()]))
+
+#     for number in numbers:
+#         url = f"https://api.callmebot.com/whatsapp.php?phone={number}&text=📢 Timetable Updated! Check app&apikey=1234567"
+#         requests.get(url)
 def send_whatsapp_notifications():
+    if not os.path.exists("subscribers.txt"):
+        return  # No subscribers yet → do nothing
+
     with open("subscribers.txt", "r") as f:
         numbers = list(set([line.strip() for line in f.readlines()]))
 
     for number in numbers:
-        url = f"https://api.callmebot.com/whatsapp.php?phone={number}&text=📢 Timetable Updated! Check app&apikey=1234567"
+        url = f"https://api.callmebot.com/whatsapp.php?phone={number}&text=📢 Timetable Updated! Check app&apikey=YOUR_API_KEY"
         requests.get(url)
 def get_last_sent_time():
     try:
@@ -374,24 +384,15 @@ def run_streamlit_mode():
             st.sidebar.success("✅ Subscribed for WhatsApp alerts!")
         else:
             st.sidebar.warning("⚠️ Enter a valid phone number")
+# def save_subscriber(phone):
+#     try:
+#         with open("subscribers.txt", "a") as f:
+#             f.write(phone + "\n")
+#     except:
+#         pass
 def save_subscriber(phone):
-    try:
-        with open("subscribers.txt", "a") as f:
-            f.write(phone + "\n")
-    except:
-        pass
-
-    # if subscribe:
-    #     # if student_email:
-    #     #     save_subscriber(student_email)
-    #     #     st.sidebar.success("✅ Subscribed for timetable updates!")
-    #     # else:
-    #     #     st.sidebar.warning("⚠️ Please enter a valid email")
-    #     if student_phone:
-    #         save_subscriber(student_phone)
-    #         st.sidebar.success("✅ Subscribed for WhatsApp alerts!")
-    #     else:
-    #         st.sidebar.warning("⚠️ Enter a valid phone number")
+    with open("subscribers.txt", "a") as f:
+        f.write(phone + "\n")
   
 # ------------------------
 # SMART EMAIL ALERT SYSTEM ✅
