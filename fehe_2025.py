@@ -1,7 +1,7 @@
 
 #!/usr/bin/env python
 # coding: utf-8
-!pip install twilio
+# !pip install twilio
 import pandas as pd
 import sys
 import streamlit as st
