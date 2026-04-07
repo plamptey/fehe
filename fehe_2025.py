@@ -340,19 +340,18 @@ def run_streamlit_mode():
         row_colors = compute_group_row_colors(df)
 
         df_display = df.copy()
-        if "DAY & DATE" in df_display.columns:
-            # Mask only consecutive duplicates
-            df_display["DAY & DATE"] = df_display["DAY & DATE"].mask(
-                df_display["DAY & DATE"].shift() == df_display["DAY & DATE"]
-            )
+        # if "DAY & DATE" in df_display.columns:
+        #     # Mask only consecutive duplicates
+        #     df_display["DAY & DATE"] = df_display["DAY & DATE"].mask(
+        #         df_display["DAY & DATE"].shift() == df_display["DAY & DATE"]
+        #     )
 
-        # th_style = "background:#4CAF50;color:white;padding:8px;text-align:center;"
         # td_style = "padding:8px;border-bottom:1px solid #ddd;vertical-align:top;"
-        th_style = """background:#4CAF50;color:white;padding:8px;text-align:center;position:sticky;top:0;z-index:2;"""
+        th_style = """background:#4CAF50;color:white;padding:8px;text-align:center;position:sticky;top:0;z-index:3;"""
         td_style = "padding:8px;border-bottom:1px solid #ddd;"
 
-
-        html = "<div style='overflow-x:auto;'><table style='border-collapse:collapse;width:100%;'>"
+        # html = "<div style='overflow-x:auto;'><table style='border-collapse:collapse;width:100%;'>"
+        html = """<div style='overflow:auto; max-height:600px; border:1px solid #ddd;'><table style='border-collapse:collapse;width:100%;'>"""
         html += "<thead><tr>"
         for col in display_cols:
             html += f"<th style='{th_style}'>{col}</th>"
@@ -366,7 +365,7 @@ def run_streamlit_mode():
                 val = row.get(col, "")
                 cell = "" if pd.isna(val) else str(val)
                 if col == "DAY & DATE":
-                    html += f"<td style='{td_style};position:sticky;left:0;background:#fff;z-index:1;font-weight:bold'>{cell}</td>"
+                    html += f"""<td style='{td_style};position:sticky;left:0;background:#fff;z-index:2;font-weight:bold'>{cell}</td>"""
                 else:
                     html += f"<td style='{td_style}'>{cell}</td>"
             html += "</tr>"
@@ -409,14 +408,25 @@ if "last_sent_time" not in st.session_state:
     st.session_state["last_sent_time"] = 0
 
 # Only send if file updated AND enough time passed
-if file_modified_time > st.session_state["last_sent_time"]:
+# if file_modified_time > st.session_state["last_sent_time"]:
+#     if (time.time() - st.session_state["last_sent_time"]) > MIN_INTERVAL:
+#         # send_update_notifications()
+#         send_whatsapp_notifications()
+
+#         st.session_state["last_sent_time"] = time.time()
+#         st.success("📧 Update notification sent!")
+if "last_file_time" not in st.session_state:
+    st.session_state["last_file_time"] = file_modified_time
+
+if file_modified_time != st.session_state["last_file_time"]:
     if (time.time() - st.session_state["last_sent_time"]) > MIN_INTERVAL:
-        # send_update_notifications()
+
         send_whatsapp_notifications()
 
         st.session_state["last_sent_time"] = time.time()
-        st.success("📧 Update notification sent!")
+        st.session_state["last_file_time"] = file_modified_time
 
+        st.success("📲 WhatsApp alerts sent!")
 st.markdown("---")
 st.markdown(f"<div style='text-align:center;color:gray'>{developer_info}</div>", unsafe_allow_html=True)
 
